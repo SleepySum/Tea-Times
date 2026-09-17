@@ -13,7 +13,7 @@ export const LiquidThemeToggle = () => {
     <button
       type="button"
       onClick={toggleTheme}
-      className="relative w-20 h-10 rounded-full glass-tier-3 p-1 cursor-pointer select-none flex items-center justify-between px-2 transition-all hover:scale-105"
+      className="relative w-20 h-10 rounded-full glass-panel p-1 cursor-pointer select-none flex items-center justify-between px-2 transition-all hover:scale-105"
       aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
     >
       <Sun className="w-4 h-4 text-amber-400 z-10" />
@@ -23,7 +23,7 @@ export const LiquidThemeToggle = () => {
       <div className="absolute inset-0 rounded-full overflow-hidden">
         <motion.div
           transition={shouldReduceMotion ? { duration: 0 } : { type: 'spring', stiffness: 420, damping: 30 }}
-          className="h-8 w-8 rounded-full bg-accent absolute top-1 shadow-[0_0_12px_var(--accent-color)]"
+          className="h-8 w-8 rounded-full bg-lime-500 absolute top-1 shadow-[0_0_12px_rgba(136,204,0,0.6)]"
           style={{
             left: isDark ? '4px' : 'calc(100% - 36px)',
           }}

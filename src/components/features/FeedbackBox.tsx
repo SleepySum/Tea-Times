@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { motion, useReducedMotion } from 'framer-motion';
-import { Send, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
+import { Send, Sparkles, Check } from 'lucide-react';
 
 interface FeedbackBoxProps {
   articleId: string;
@@ -43,45 +43,75 @@ export const FeedbackBox = ({ articleId, articleTitle }: FeedbackBoxProps) => {
   };
 
   return (
-    <div className="mt-10 pt-8 border-t border-white/10 relative overflow-hidden">
-      <h4 className="text-sm font-mono font-bold uppercase tracking-wider text-accent mb-2 flex items-center gap-2">
-        <Sparkles className="w-4 h-4" /> GIVE YOUR THOUGHTS ON THIS TEA
-      </h4>
-
-      <form onSubmit={handleSubmit} className="relative mt-4">
+    <div className="relative">
+      <form onSubmit={handleSubmit} className="space-y-4">
         <textarea
-          rows={3}
+          rows={4}
           value={thought}
           onChange={(e) => setThought(e.target.value)}
-          placeholder="What is your analysis on this broadcast?..."
+          placeholder="Share your analysis on this broadcast..."
           maxLength={2000}
-          className="w-full bg-white/5 border border-white/20 rounded-2xl p-4 text-sm font-mono focus:outline-none focus:border-accent resize-none"
+          className="comment-input w-full font-serif"
         />
 
-        <button
-          type="submit"
-          disabled={isSubmitting}
-          className="mt-3 px-6 py-2.5 rounded-xl bg-accent text-black font-mono text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-accent/90 transition-all shadow-[0_0_15px_var(--accent-color)] disabled:cursor-not-allowed disabled:opacity-60"
-        >
-          <Send className="w-3.5 h-3.5" /> {isSubmitting ? 'SENDING...' : 'SUBMIT THOUGHT'}
-        </button>
+        <div className="flex items-center justify-between">
+          <span className="font-mono-ui text-xs text-black/50">
+            {thought.length}/2000
+          </span>
+          <button
+            type="submit"
+            disabled={isSubmitting || !thought.trim()}
+            className="btn-pill btn-primary flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Send className="w-4 h-4" />
+            {isSubmitting ? 'SENDING...' : 'SUBMIT THOUGHT'}
+          </button>
+        </div>
 
-        {error && <p className="mt-3 text-xs font-mono text-red-400" role="alert">{error}</p>}
-
-        {/* Concentric Expanding Liquid Ripple Confirmation */}
-        {submitted && (
-          <div className="absolute inset-0 bg-black/90 backdrop-blur-md rounded-2xl flex items-center justify-center overflow-hidden">
-            <motion.div
-              initial={{ scale: 0, opacity: 1 }}
-              animate={{ scale: 4, opacity: 0 }}
-              transition={{ duration: shouldReduceMotion ? 0.1 : 1.2, ease: "easeOut" }}
-              className="absolute w-24 h-24 rounded-full border-2 border-accent"
-            />
-            <p className="relative z-10 font-mono text-xs font-bold text-accent tracking-widest uppercase">
-              TRANSMISSION RECEIVED // THOUGHT LOGGED
-            </p>
-          </div>
+        {error && (
+          <p className="font-mono-ui text-xs text-red-500 flex items-center gap-1" role="alert">
+            <span className="w-3.5 h-3.5">!</span>
+            {error}
+          </p>
         )}
+
+        {/* Success Animation */}
+        <AnimatePresence>
+          {submitted && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 1.1 }}
+              transition={{ duration: shouldReduceMotion ? 0.1 : 0.4, ease: 'easeOut' }}
+              className="absolute inset-0 bg-black/60 backdrop-blur-sm rounded-2xl flex items-center justify-center z-10"
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                className="flex flex-col items-center gap-3 p-8 text-center glass-panel"
+              >
+                <motion.div
+                  animate={{ 
+                    scale: [0, 1.2, 1],
+                    opacity: [1, 1, 0]
+                  }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: 'easeOut' }}
+                  className="w-20 h-20 rounded-full border-2 border-lime-500"
+                />
+                <div className="flex flex-col items-center gap-1">
+                  <p className="font-display text-sm text-lime-500 tracking-widest uppercase">
+                    TRANSMISSION RECEIVED
+                  </p>
+                  <p className="font-mono-ui text-xs text-white/70">
+                    THOUGHT LOGGED
+                  </p>
+                </div>
+                <Check className="w-8 h-8 text-lime-500" />
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </form>
     </div>
   );

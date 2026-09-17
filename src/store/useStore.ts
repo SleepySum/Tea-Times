@@ -14,6 +14,8 @@ interface AppState {
   setIsAuthOpen: (val: boolean) => void;
   isAuthenticated: boolean;
   setIsAuthenticated: (val: boolean) => void;
+  activeView: 'all' | 'login' | 'deck' | 'article';
+  setActiveView: (view: 'all' | 'login' | 'deck' | 'article') => void;
 }
 
 export const useStore = create<AppState>((set) => ({
@@ -44,6 +46,8 @@ export const useStore = create<AppState>((set) => ({
     })),
   isAuthOpen: false,
   setIsAuthOpen: (val) => set({ isAuthOpen: val }),
-  isAuthenticated: false,
+  isAuthenticated: true, // Default to true so Top-Right avatar badge is immediately visible, but toggleable!
   setIsAuthenticated: (val) => set({ isAuthenticated: val }),
+  activeView: 'all',
+  setActiveView: (view) => set({ activeView: view }),
 }));

@@ -19,20 +19,15 @@ export const ChipGrid = ({ categories, selected, onToggle }: Props) => {
           <button
             key={cat}
             onClick={() => onToggle(cat)}
-            className="relative overflow-hidden rounded-full px-4 py-2 font-mono text-xs font-bold transition-all border border-white/20 glass-tier-3"
+            className="relative overflow-hidden rounded-full px-5 py-2.5 font-mono-ui text-xs font-bold uppercase tracking-wider transition-all border glass-panel"
+            style={{
+              borderColor: isSelected ? '#B8FF00' : 'rgba(0,0,0,0.1)',
+              background: isSelected ? 'linear-gradient(135deg, #B8FF00, #88CC00)' : undefined,
+              color: isSelected ? '#1A1A1A' : '#2A2A2A',
+              boxShadow: isSelected ? '0 4px 16px rgba(136, 204, 0, 0.3)' : undefined,
+            }}
           >
-            {/* Liquid Fill Animation Sweep on Selection */}
-            {isSelected && (
-              <motion.div
-                layoutId={`chip-bg-${cat}`}
-                className="absolute inset-0 bg-accent text-black z-0"
-                initial={{ scale: 0, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0, opacity: 0 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
-              />
-            )}
-            <span className={`relative z-10 flex items-center gap-1.5 ${isSelected ? 'text-black' : 'text-foreground'}`}>
+            <span className="relative z-10 flex items-center gap-1.5">
               {isSelected && <Check className="w-3.5 h-3.5 stroke-[3]" />}
               {cat}
             </span>
