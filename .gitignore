@@ -1,10 +1,38 @@
-node_modules/
-.next/
-.vercel/
-.env
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+/.vitest
+
+# next.js
+/.next/
+/out/
+/build
+
+# production
+/profile.html
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# local env files (contain secrets — never commit these)
 .env.local
-.env.*.local
-!.env.example
+.env.development.local
+.env.test.local
+.env.production.local
 
-
+# vercel
 .vercel
+
+# typescript
+**/*.tsbuildinfo
+tsconfig.tsbuildinfo
