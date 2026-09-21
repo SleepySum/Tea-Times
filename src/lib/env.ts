@@ -1,13 +1,14 @@
 /**
  * Environment variable validation.
  *
- * Import this module once at the entry point of your server-side code so that
- * the app fails fast with a clear message when required secrets are missing.
+ * Call `validateEnv()` at the top of any server-side handler that depends on
+ * secrets (API routes, server actions, server components) so the app fails
+ * fast with a clear message when required env vars are missing.
  *
- * Next.js runs this automatically when you import it from a server component,
- * route handler, or `layout.tsx` / `page.tsx` server file.
+ * Do NOT call this at module scope — that runs during static generation and
+ * would crash builds when secrets are absent from the build environment.
  */
-export function validateEnv() {
+export function validateEnv(): void {
   const required: Array<{ key: string; label: string }> = [
     { key: 'MONGODB_URI', label: 'MongoDB connection string' },
   ];
@@ -29,6 +30,3 @@ export function validateEnv() {
     );
   }
 }
-
-/** Call once at module scope so validation runs before any request handler. */
-validateEnv();

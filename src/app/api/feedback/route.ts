@@ -1,7 +1,8 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { getMongoClient } from '@/lib/mongodb';
-import { sanitize, isRateLimited, MAX_REQUESTS_PER_WINDOW } from '@/lib/security';
+import { sanitize, isRateLimited } from '@/lib/security';
+import { validateEnv } from '@/lib/env';
 
 export const runtime = 'nodejs';
 
@@ -42,6 +43,9 @@ export async function POST(request: NextRequest) {
       { status: 429, headers: { 'Retry-After': '60' } }
     );
   }
+
+  // ---- Validate environment ----
+  validateEnv();
 
   // ---- Parse body ----
   let body: FeedbackPayload;

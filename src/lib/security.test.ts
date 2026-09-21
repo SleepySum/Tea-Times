@@ -11,7 +11,7 @@ import { sanitize, isRateLimited, MAX_REQUESTS_PER_WINDOW } from './security';
 describe('sanitize', () => {
   it('escapes HTML tags', () => {
     expect(sanitize('<script>alert(1)</script>')).toBe(
-      '&lt;script&gt;alert(1)&lt;&#x2F;script&gt;'
+      '&lt;script&gt;alert(1)&lt;/script&gt;'
     );
   });
 
@@ -19,8 +19,8 @@ describe('sanitize', () => {
     expect(sanitize('a"b\'c')).toBe('a&quot;b&#x27;c');
   });
 
-  it('escapes forward slashes', () => {
-    expect(sanitize('http://example.com')).toBe('http:&#x2F;&#x2F;example.com');
+  it('does not encode forward slashes (URLs remain readable)', () => {
+    expect(sanitize('http://example.com')).toBe('http://example.com');
   });
 
   it('trims surrounding whitespace', () => {

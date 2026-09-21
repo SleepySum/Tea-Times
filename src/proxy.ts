@@ -5,7 +5,7 @@ import type { NextRequest } from 'next/server';
 // Security headers applied to every response.
 // Tighten CSP / referrer-policy to your needs before shipping to production.
 // ---------------------------------------------------------------------------
-export function proxy(request: NextRequest) {
+export function proxy(_request: NextRequest) {
   const response = NextResponse.next();
 
   response.headers.set('X-Frame-Options', 'DENY');
@@ -17,7 +17,7 @@ export function proxy(request: NextRequest) {
     'Content-Security-Policy',
     [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "script-src 'self' https://fonts.googleapis.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com",
       "font-src 'self' https://fonts.gstatic.com",
       "img-src 'self' data: https:",
