@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 // Load environment variables
 require('dotenv').config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ylloyfpb:d593b457-f85b-4719-860d-c21d917125b3@cluster0.hfv6r.mongodb.net/teatimes?retryWrites=true&w=majority&ssl=true';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ylloyfpb:d593b457-f85b-4719-860d-c21d917125b3@cluster0.hfv6r.mongodb.net/teatimes?retryWrites=true&w=majority';
 const MONGODB_DB = process.env.MONGODB_DB || 'teatimes';
 
 let client = null;
@@ -189,7 +189,11 @@ async function connectDB() {
   if (db) return db;
 
   try {
-    client = new MongoClient(MONGODB_URI);
+    // Try SRV connection first
+    client = new MongoClient(MONGODB_URI, {
+      serverSelectionTimeoutMS: 10000,
+      connectTimeoutMS: 10000
+    });
     await client.connect();
     db = client.db(MONGODB_DB);
 
@@ -199,12 +203,33 @@ async function connectDB() {
     console.log('✅ Connected to MongoDB Atlas');
     return db;
   } catch (err) {
-    console.error('❌ MongoDB connection error:', err.message);
-    throw err;
+    console.error('❌ MongoDB SRV connection failed, trying standard connection:', err.message);
+    
+    // Fallback to standard connection string format
+    try {
+      const standardUri = MONGODB_URI.replace(/\/teatimes/, '').replace('mongodb+srv://', 'mongodb://').replace('.net/', '.net:27017/');
+      client = new MongoClient(standardUri, {
+        serverSelectionTimeoutMS: 10000,
+        connectTimeoutMS: 10000
+      });
+      await client.connect();
+      db = client.db(MONGODB_DB);
+      
+      await seedData();
+      console.log('✅ Connected to MongoDB (standard connection)');
+      return db;
+    } catch (err2) {
+      console.error('❌ MongoDB connection failed completely:', err2.message);
+      // Continue without database - use in-memory fallback
+      console.warn('⚠️  Running in offline mode with in-memory data');
+      return null;
+    }
   }
 }
 
 async function seedData() {
+  if (!db) return;
+  
   const usersCount = await db.collection('users').countDocuments();
   if (usersCount === 0) {
     await db.collection('users').insertMany(initialData.users);
@@ -234,16 +259,19 @@ async function seedData() {
 // Users
 async function findUserByEmail(email) {
   const database = await connectDB();
+  if (!database) return null;
   return database.collection('users').findOne({ email: email.toLowerCase() });
 }
 
 async function findUserById(id) {
   const database = await connectDB();
+  if (!database) return null;
   return database.collection('users').findOne({ id: id });
 }
 
 async function addUser(user) {
   const database = await connectDB();
+  if (!database) return user;
   if (!user.preferences) {
     user.preferences = ["Minimalist Design", "Artisan Terroir", "Vessels & Craft"];
   }
@@ -253,6 +281,7 @@ async function addUser(user) {
 
 async function updateUser(id, updates) {
   const database = await connectDB();
+  if (!database) return null;
   const result = await database.collection('users').findOneAndUpdate(
     { id: id },
     { $set: updates },
@@ -263,6 +292,7 @@ async function updateUser(id, updates) {
 
 async function updateUserPreferences(id, preferences) {
   const database = await connectDB();
+  if (!database) return null;
   const result = await database.collection('users').findOneAndUpdate(
     { id: id },
     { $set: { preferences: preferences } },
@@ -274,6 +304,7 @@ async function updateUserPreferences(id, preferences) {
 // Articles & Personalization
 async function getArticles(preferences = null) {
   const database = await connectDB();
+  if (!database) return [];
   let query = {};
   let docs = await database.collection('articles').find(query).sort({ createdAt: -1 }).toArray();
 
@@ -289,11 +320,13 @@ async function getArticles(preferences = null) {
 
 async function getArticle(id) {
   const database = await connectDB();
+  if (!database) return null;
   return database.collection('articles').findOne({ id: id });
 }
 
 async function addArticle(article) {
   const database = await connectDB();
+  if (!database) return article;
   await database.collection('articles').insertOne(article);
   return article;
 }
@@ -301,6 +334,8 @@ async function addArticle(article) {
 // Real Vote Handling (1 vote per user)
 async function recordVote(articleId, userId, requestedAction) {
   const database = await connectDB();
+  if (!database) return null;
+  
   const article = await database.collection('articles').findOne({ id: articleId });
   if (!article) return null;
 
@@ -312,39 +347,27 @@ async function recordVote(articleId, userId, requestedAction) {
   const currentVote = reaction ? reaction.action : null;
 
   let updates = {};
-  let reactionUpdate = {};
 
   if (requestedAction === 'like') {
     if (currentVote === 'like') {
-      // Toggle off
       updates = { $inc: { likes: -1 } };
-      reactionUpdate = { $unset: { action: "" } };
       await database.collection('reactions').deleteOne({ articleId, userId });
     } else if (currentVote === 'dislike') {
-      // Switch from dislike to like
       updates = { $inc: { dislikes: -1, likes: 1 } };
-      reactionUpdate = { $set: { action: 'like' } };
       await database.collection('reactions').updateOne({ articleId, userId }, { $set: { action: 'like' } });
     } else {
-      // New like
       updates = { $inc: { likes: 1 } };
-      reactionUpdate = { $set: { action: 'like' } };
       await database.collection('reactions').updateOne({ articleId, userId }, { $set: { action: 'like' } }, { upsert: true });
     }
   } else if (requestedAction === 'dislike') {
     if (currentVote === 'dislike') {
-      // Toggle off
       updates = { $inc: { dislikes: -1 } };
       await database.collection('reactions').deleteOne({ articleId, userId });
     } else if (currentVote === 'like') {
-      // Switch from like to dislike
       updates = { $inc: { likes: -1, dislikes: 1 } };
-      reactionUpdate = { $set: { action: 'dislike' } };
       await database.collection('reactions').updateOne({ articleId, userId }, { $set: { action: 'dislike' } });
     } else {
-      // New dislike
       updates = { $inc: { dislikes: 1 } };
-      reactionUpdate = { $set: { action: 'dislike' } };
       await database.collection('reactions').updateOne({ articleId, userId }, { $set: { action: 'dislike' } }, { upsert: true });
     }
   }
@@ -365,6 +388,7 @@ async function recordVote(articleId, userId, requestedAction) {
 
 async function getUserReaction(articleId, userId) {
   const database = await connectDB();
+  if (!database) return null;
   const reaction = await database.collection('reactions').findOne({ articleId, userId });
   return reaction ? reaction.action : null;
 }
@@ -372,11 +396,13 @@ async function getUserReaction(articleId, userId) {
 // Comments
 async function getComments(articleId) {
   const database = await connectDB();
+  if (!database) return [];
   return database.collection('comments').find({ articleId: articleId }).toArray();
 }
 
 async function addComment(comment) {
   const database = await connectDB();
+  if (!database) return comment;
   await database.collection('comments').insertOne(comment);
   return comment;
 }
