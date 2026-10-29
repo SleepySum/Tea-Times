@@ -31,7 +31,9 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static assets
 app.use('/assets', express.static(path.join(__dirname, 'assets')));
-app.use(express.static(path.join(__dirname)));
+app.use(express.static(path.join(__dirname), {
+  index: false // Disable automatic index.html serving
+}));
 
 // Helper: JWT verification middleware
 function authenticateToken(req, res, next) {
@@ -677,14 +679,18 @@ async function autoSynthesizeLiveNews() {
 // Trigger automatic generation in background on boot
 setTimeout(autoSynthesizeLiveNews, 3000);
 
-// Catch-all route to serve index.html for SPA
-app.use((req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
-});
-
-// Health check endpoint
+// Health check endpoint (must be before catch-all)
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
+// Catch-all route to serve index.html for SPA (only for non-API routes)
+app.use((req, res) => {
+  // Don't serve index.html for API routes
+  if (req.path.startsWith('/api/')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
+  res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Start Server
