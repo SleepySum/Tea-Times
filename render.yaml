@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: tea-times
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+    database:
+      name: tea-times-db
+      databaseName: teatimes
+      user: teatimes-user
