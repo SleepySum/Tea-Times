@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html class="dark" lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>TEA TIMES — Minimalist Design & Architecture</title>
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'sans-serif'],
+            masthead: ['"Montserrat"', 'sans-serif'],
+            mono: ['"Space Grotesk"', 'monospace']
+          },
+          colors: {
+            vessel: '#0e110e',
+            subtleBorder: 'rgba(255, 255, 255, 0.08)',
+            amberAccent: '#e58e38'
+          }
+        }
+      }
+    }
+  </script>
+  
+  <style>
+    * { box-sizing: border-box; user-select: none; }
+    html, body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #030202; font-family: 'Plus Jakarta Sans', sans-serif; color: #f1f5f9; }
+    .master-card { background-color: #0c0908; border-radius: 36px; box-shadow: 0 45px 110px -25px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.08); }
+    .glass-pill-cta { background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.22); }
+    .glass-pill-cta:hover { background: rgba(255, 255, 255, 0.24); border-color: rgba(255, 255, 255, 0.45); }
+    .brand-masthead { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: -0.065em; }
+    @keyframes tickerScroll { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
+    .ticker-track { display: inline-flex; white-space: nowrap; animation: tickerScroll 48s linear infinite; }
+  </style>
+</head>
+<body class="w-screen h-screen overflow-hidden flex flex-col justify-between relative select-none">
+  
+  <!-- Header -->
+  <header class="relative z-30 w-full px-6 sm:px-12 pt-5 sm:pt-6 flex flex-col gap-3 flex-shrink-0">
+    <div class="flex items-center justify-between w-full">
+      <div class="flex items-center gap-4 cursor-pointer" onclick="closeReaderView()">
+        <h1 class="brand-masthead text-4xl sm:text-6xl lg:text-[72px] text-white tracking-tighter select-none flex items-center gap-2">
+          <span>TEA</span><span>TIMES</span>
+        </h1>
+      </div>
+      <div class="flex items-center gap-3">
+        <button class="glass-pill-cta px-4 py-2 rounded-full text-xs text-white font-medium" id="openAuthModalBtn">
+          <span class="material-symbols-outlined">person</span>
+          <span>Sign In</span>
+        </button>
+      </div>
+    </div>
+    
+    <!-- Stock Ticker -->
+    <div class="w-full overflow-hidden border-y border-white/[0.08] bg-black/40 py-1.5 px-2">
+      <div class="ticker-track" id="stockTickerTrack">
+        <span class="inline-flex items-center gap-6 px-4">
+          <span>NIKKEI 225 <strong class="text-white">38,981.75</strong> <span class="text-emerald-400">▲ +0.82%</span></span>
+          <span class="text-white/20">•</span>
+          <span>S&P 500 <strong class="text-white">5,864.67</strong> <span class="text-emerald-400">▲ +0.45%</span></span>
+          <span class="text-white/20">•</span>
+          <span>NASDAQ <strong class="text-white">18,518.61</strong> <span class="text-emerald-400">▲ +0.68%</span></span>
+          <span class="text-white/20">•</span>
+          <span>FTSE 100 <strong class="text-white">8,249.20</strong> <span class="text-rose-400">▼ -0.14%</span></span>
+        </span>
+        <span class="inline-flex items-center gap-6 px-4">
+          <span>NIKKEI 225 <strong class="text-white">38,981.75</strong> <span class="text-emerald-400">▲ +0.82%</span></span>
+          <span class="text-white/20">•</span>
+          <span>S&P 500 <strong class="text-white">5,864.67</strong> <span class="text-emerald-400">▲ +0.45%</span></span>
+          <span class="text-white/20">•</span>
+          <span>NASDAQ <strong class="text-white">18,518.61</strong> <span class="text-emerald-400">▲ +0.68%</span></span>
+          <span class="text-white/20">•</span>
+          <span>FTSE 100 <strong class="text-white">8,249.20</strong> <span class="text-rose-400">▼ -0.14%</span></span>
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="relative z-20 flex-1 w-full flex items-center justify-center p-4 sm:p-6">
+    <article class="master-card w-full max-w-[880px] h-[495px] flex flex-col p-5 sm:p-6 relative overflow-hidden">
+      <div class="relative w-full h-full bg-gradient-to-br from-[#1a120e] to-[#0a0705] flex items-center justify-center">
+        <div class="text-center">
+          <div class="w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center mx-auto mb-4">
+            <span class="material-symbols-outlined text-3xl text-amber-400">local_cafe</span>
+          </div>
+          <h2 class="text-white text-2xl font-light mb-2">Welcome to Tea Times</h2>
+          <p class="text-slate-400 text-sm">Minimalist Design & Architecture Editorial</p>
+        </div>
+      </div>
+      <div class="pt-4 flex items-center justify-between">
+        <span class="text-[11px] font-mono text-white/60 uppercase">THE COURSE</span>
+        <div class="flex gap-2">
+          <button class="glass-pill-cta px-3 py-1 rounded-full text-xs">Previous</button>
+          <button class="glass-pill-cta px-3 py-1 rounded-full text-xs">Next</button>
+        </div>
+      </div>
+    </article>
+  </main>
+
+  <script>
+    // Fetch stocks on load
+    fetch('/api/stocks')
+      .then(res => res.json())
+      .then(data => console.log('Stocks loaded:', data.stocks.length))
+      .catch(err => console.error('Stock fetch error:', err));
+  </script>
+</body>
+</html>
