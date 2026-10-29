@@ -682,6 +682,11 @@ app.use((req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok', timestamp: new Date().toISOString() });
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`🍵 TEA TIMES production server with Firebase backend running at http://localhost:${PORT}`);

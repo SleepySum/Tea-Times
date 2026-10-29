@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 // Load environment variables
 require('dotenv').config();
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ylloyfpb:d593b457-f85b-4719-860d-c21d917125b3@cluster0.hfv6r.mongodb.net/teatimes?retryWrites=true&w=majority';
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb+srv://ylloyfpb:d593b457-f85b-4719-860d-c21d917125b3@cluster0.hfv6r.mongodb.net/teatimes?retryWrites=true&w=majority&ssl=true';
 const MONGODB_DB = process.env.MONGODB_DB || 'teatimes';
 
 let client = null;
