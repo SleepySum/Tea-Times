@@ -1,16 +1,18 @@
 <!DOCTYPE html>
-<html class="dark" lang="en">
+<html class="dark" lang="en" style="width: 100vw; height: 100vh; overflow: hidden; position: relative;">
 <head>
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
-  <title>TEA TIMES — Minimalist Design & Architecture</title>
+  <title>TEA TIMES — Minimalist Design &amp; Architecture</title>
   
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Inter / Plus Jakarta Sans / Montserrat 900 for bold masthead / Space Grotesk -->
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,900;1,900&amp;family=Plus+Jakarta+Sans:wght@300;400;500;600;700&amp;family=Space+Grotesk:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+
+  <!-- Tailwind CSS v3 -->
+  <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
   <script>
     tailwind.config = {
       darkMode: 'class',
@@ -23,96 +25,1542 @@
           },
           colors: {
             vessel: '#0e110e',
-            subtleBorder: 'rgba(255, 255, 255, 0.08)',
-            amberAccent: '#e58e38'
+            subtleBorder: 'rgba(255, 255, 255, 0.08)'
           }
         }
       }
     }
   </script>
-  
+
   <style>
-    * { box-sizing: border-box; user-select: none; }
-    html, body { margin: 0; padding: 0; width: 100vw; height: 100vh; overflow: hidden; background-color: #030202; font-family: 'Plus Jakarta Sans', sans-serif; color: #f1f5f9; }
-    .master-card { background-color: #0c0908; border-radius: 36px; box-shadow: 0 45px 110px -25px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.08); }
-    .glass-pill-cta { background: rgba(255, 255, 255, 0.12); backdrop-filter: blur(20px); border: 1px solid rgba(255, 255, 255, 0.22); }
-    .glass-pill-cta:hover { background: rgba(255, 255, 255, 0.24); border-color: rgba(255, 255, 255, 0.45); }
-    .brand-masthead { font-family: 'Montserrat', sans-serif; font-weight: 900; letter-spacing: -0.065em; }
-    @keyframes tickerScroll { 0% { transform: translate3d(0, 0, 0); } 100% { transform: translate3d(-50%, 0, 0); } }
-    .ticker-track { display: inline-flex; white-space: nowrap; animation: tickerScroll 48s linear infinite; }
+    * {
+      box-sizing: border-box;
+      user-select: none;
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      background-color: #030202;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      color: #f1f5f9;
+    }
+
+    /* Animated deep dark organic ambient mesh gradient background - Dark Burnt Amber & Onyx */
+    .ambient-background-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      z-index: 0;
+      pointer-events: none;
+      background-color: #050403;
+    }
+
+    .ambient-mesh-canvas {
+      position: absolute;
+      inset: -25%;
+      width: 150%;
+      height: 150%;
+      background: 
+        radial-gradient(circle at 18% 22%, rgba(31, 14, 5, 0.65) 0%, transparent 48%),
+        radial-gradient(circle at 82% 28%, rgba(51, 21, 5, 0.55) 0%, transparent 46%),
+        radial-gradient(circle at 65% 78%, rgba(42, 18, 5, 0.5) 0%, transparent 45%),
+        radial-gradient(circle at 25% 82%, rgba(20, 8, 2, 0.8) 0%, transparent 52%),
+        radial-gradient(circle at 50% 50%, rgba(5, 4, 3, 0.95) 0%, transparent 60%);
+      filter: blur(85px);
+      animation: ambientDrift 28s ease-in-out infinite alternate;
+      will-change: transform;
+      transform-origin: center center;
+    }
+
+    .ambient-mesh-secondary {
+      position: absolute;
+      inset: -20%;
+      width: 140%;
+      height: 140%;
+      background: 
+        radial-gradient(circle at 45% 20%, rgba(42, 18, 5, 0.45) 0%, transparent 42%),
+        radial-gradient(circle at 75% 65%, rgba(31, 14, 5, 0.5) 0%, transparent 50%),
+        radial-gradient(circle at 30% 60%, rgba(51, 21, 5, 0.35) 0%, transparent 45%);
+      filter: blur(100px);
+      animation: ambientRotateDrift 36s ease-in-out infinite alternate-reverse;
+      will-change: transform, opacity;
+      transform-origin: 45% 55%;
+    }
+
+    @keyframes ambientDrift {
+      0% { transform: translate3d(-3%, -2%, 0) scale(1) rotate(0deg); }
+      33% { transform: translate3d(3%, 4%, 0) scale(1.08) rotate(2deg); }
+      66% { transform: translate3d(-4%, 3%, 0) scale(1.04) rotate(-1.5deg); }
+      100% { transform: translate3d(2%, -3%, 0) scale(1.1) rotate(1deg); }
+    }
+
+    @keyframes ambientRotateDrift {
+      0% { transform: translate3d(3%, 2%, 0) scale(1.05) rotate(0deg); opacity: 0.75; }
+      50% { transform: translate3d(-2%, -3%, 0) scale(0.96) rotate(-3deg); opacity: 0.95; }
+      100% { transform: translate3d(-4%, 2%, 0) scale(1.08) rotate(3deg); opacity: 0.8; }
+    }
+
+    /* Micro dot canvas overlay */
+    #dotMatrixCanvas {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    /* Reference heavy bold font matching masthead */
+    .brand-masthead {
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 900;
+      letter-spacing: -0.065em;
+      line-height: 0.85;
+      text-transform: uppercase;
+    }
+
+    /* Master Card Vessel */
+    .master-card {
+      background-color: #0c0908;
+      border-radius: 36px;
+      box-shadow: 0 45px 110px -25px rgba(0, 0, 0, 0.95), 0 0 0 1px rgba(255, 255, 255, 0.08);
+    }
+
+    /* Inner Hero Media Card */
+    .inner-hero-media {
+      border-radius: 24px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Frosted glassmorphic pill button */
+    .glass-pill-cta {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35);
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .glass-pill-cta:hover {
+      background: rgba(255, 255, 255, 0.24);
+      border-color: rgba(255, 255, 255, 0.45);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Discreet Carousel Nav Buttons */
+    .nav-arrow-btn {
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s ease;
+    }
+    .nav-arrow-btn:hover {
+      background: rgba(255, 255, 255, 0.16);
+      border-color: rgba(255, 255, 255, 0.3);
+      color: #fff;
+    }
+
+    /* Glass dropdown menu */
+    .glass-dropdown-menu {
+      background: rgba(18, 12, 10, 0.94);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 20px 45px rgba(0, 0, 0, 0.75);
+    }
+
+    /* Glass modal */
+    .glass-modal {
+      background: rgba(15, 10, 8, 0.96);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      box-shadow: 0 35px 80px rgba(0, 0, 0, 0.85);
+    }
+
+    /* Scrollbar for right-hand narrative pane */
+    .reader-scrollable::-webkit-scrollbar {
+      width: 4px;
+    }
+    .reader-scrollable::-webkit-scrollbar-track {
+      background: rgba(13, 9, 8, 0.3);
+    }
+    .reader-scrollable::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+    }
+    .reader-scrollable::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    /* Dark theme input boxes for Login */
+    .dark-input {
+      background-color: #0c0908 !important;
+      border: 1px solid rgba(255, 255, 255, 0.14) !important;
+      color: #f1f5f9 !important;
+      transition: all 0.2s ease;
+    }
+    .dark-input:focus {
+      outline: none !important;
+      border-color: #f59e0b !important;
+      background-color: #140d0a !important;
+      box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.25) !important;
+    }
+    .dark-input::placeholder {
+      color: rgba(255, 255, 255, 0.3) !important;
+    }
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover, 
+    input:-webkit-autofill:focus {
+      -webkit-box-shadow: 0 0 0px 1000px #0c0908 inset !important;
+      -webkit-text-fill-color: #f1f5f9 !important;
+      border-color: rgba(255, 255, 255, 0.14) !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
   </style>
 </head>
 <body class="w-screen h-screen overflow-hidden flex flex-col justify-between relative select-none">
-  
-  <!-- Header -->
-  <header class="relative z-30 w-full px-6 sm:px-12 pt-5 sm:pt-6 flex flex-col gap-3 flex-shrink-0">
-    <div class="flex items-center justify-between w-full">
-      <div class="flex items-center gap-4 cursor-pointer" onclick="closeReaderView()">
-        <h1 class="brand-masthead text-4xl sm:text-6xl lg:text-[72px] text-white tracking-tighter select-none flex items-center gap-2">
-          <span>TEA</span><span>TIMES</span>
-        </h1>
+
+  <!-- Animated Deep Dark Ambient Gradient Background Layers -->
+  <div class="ambient-background-container">
+    <div class="ambient-mesh-canvas"></div>
+    <div class="ambient-mesh-secondary"></div>
+  </div>
+
+  <!-- Interactive Micro Dot Matrix Canvas -->
+  <canvas height="1024" id="dotMatrixCanvas" width="1280"></canvas>
+
+  <!-- Toast Notification Pill -->
+  <div class="fixed top-6 right-8 z-50 transform transition-all duration-300 pointer-events-none flex items-center gap-2.5 bg-[#18110e]/95 border border-white/20 text-slate-100 px-4 py-2.5 rounded-full shadow-2xl backdrop-blur-xl text-xs tracking-wider uppercase font-medium -translate-y-16 opacity-0" id="toastNotification">
+    <span class="material-symbols-outlined text-[17px] text-amber-400" id="toastIcon">check_circle</span>
+    <span id="toastMessage">Reader mode opened</span>
+  </div>
+
+  <!-- ================= TOP FLOATING NAVIGATION BAR ================= -->
+  <header class="relative z-30 w-full px-8 sm:px-12 pt-7 flex items-center justify-between flex-shrink-0" id="topNavHeader">
+    <!-- Top Left: "TEA TIMES" Extra Bold Black Sans-Serif -->
+    <div class="flex items-center gap-4 cursor-pointer" onclick="closeReaderView()">
+      <h1 class="brand-masthead text-2xl sm:text-3xl text-white tracking-tighter drop-shadow-md select-none flex items-center gap-2" style="font-size: 72px; line-height: 0.85; letter-spacing: -0.05em;">
+        <span>TEA</span>
+        <span>TIMES</span>
+      </h1>
+    </div>
+
+    <!-- Top Right: Feed Selector Dropdown & Sign In Button -->
+    <div class="flex items-center gap-3">
+      
+      <!-- Dropdown Container -->
+      <div class="relative" id="feedDropdownContainer">
+        <button class="glass-pill-cta px-4 sm:px-5 py-2 rounded-full text-xs tracking-wide text-white font-medium flex items-center gap-2.5 cursor-pointer" id="feedDropdownBtn">
+          <span class="material-symbols-outlined text-[16px] text-white/80">tune</span>
+          <span id="currentFeedName">Live Global News</span>
+          <span class="material-symbols-outlined text-[15px] text-white/60 transition-transform duration-200" id="dropdownArrow">expand_more</span>
+        </button>
+
+        <!-- Glassmorphic Dropdown Menu -->
+        <div class="glass-dropdown-menu absolute right-0 mt-2 w-56 rounded-2xl p-1.5 flex flex-col shadow-2xl z-40 hidden" id="feedDropdownMenu">
+          <div class="px-3 py-2 text-[10px] font-mono tracking-widest text-white/40 uppercase border-b border-white/5">
+            Select Feed Channel
+          </div>
+          <button class="feed-option text-left px-3 py-2 rounded-xl text-xs font-medium text-amber-300 bg-white/10 flex items-center justify-between transition-colors" data-feed="Live Global News">
+            <span>Live Global News</span>
+            <span class="material-symbols-outlined text-[14px]">check</span>
+          </button>
+          <button class="feed-option text-left px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:bg-white/10 flex items-center justify-between transition-colors" data-feed="Artisan Terroir">
+            <span>Artisan Terroir</span>
+          </button>
+          <button class="feed-option text-left px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:bg-white/10 flex items-center justify-between transition-colors" data-feed="Ceremonies &amp; Culture">
+            <span>Ceremonies &amp; Culture</span>
+          </button>
+          <button class="feed-option text-left px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:bg-white/10 flex items-center justify-between transition-colors" data-feed="Vessels &amp; Craft">
+            <span>Vessels &amp; Craft</span>
+          </button>
+          <button class="feed-option text-left px-3 py-2 rounded-xl text-xs font-medium text-white/80 hover:bg-white/10 flex items-center justify-between transition-colors" data-feed="Harvest Reports">
+            <span>Harvest Reports</span>
+          </button>
+        </div>
       </div>
-      <div class="flex items-center gap-3">
-        <button class="glass-pill-cta px-4 py-2 rounded-full text-xs text-white font-medium" id="openAuthModalBtn">
-          <span class="material-symbols-outlined">person</span>
+
+      <!-- User Auth State: Sign In Button or Profile Pill -->
+      <div id="authNavContainer">
+        <!-- Logged Out View -->
+        <button class="glass-pill-cta px-4 sm:px-5 py-2 rounded-full text-xs tracking-wide text-white/95 hover:text-white font-medium flex items-center gap-2 cursor-pointer transition active:scale-95" id="openAuthModalBtn">
+          <span class="material-symbols-outlined text-[16px] text-amber-300">person</span>
           <span>Sign In</span>
         </button>
+
+        <!-- Logged In View (Hidden by default) -->
+        <div class="relative hidden" id="userProfileMenuContainer">
+          <button class="glass-pill-cta px-2.5 sm:px-3 py-1.5 rounded-full text-xs text-white font-medium flex items-center gap-2 cursor-pointer" id="userProfileBtn">
+            <img id="userNavAvatar" src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120&q=80" alt="User avatar" class="w-6 h-6 rounded-full object-cover border border-amber-400/50">
+            <span id="userNavName" class="hidden sm:inline text-xs font-medium max-w-[90px] truncate">Master Sen</span>
+            <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
+          </button>
+          
+          <!-- User Dropdown Menu -->
+          <div class="glass-dropdown-menu absolute right-0 mt-2 w-56 rounded-2xl p-2 flex flex-col shadow-2xl z-40 hidden" id="userDropdownMenu">
+            <div class="px-3 py-2 border-b border-white/10">
+              <p class="text-xs font-medium text-white truncate" id="dropdownUserName">Master Sen</p>
+              <p class="text-[10px] font-mono text-white/50 truncate" id="dropdownUserEmail">sen@teatimes.org</p>
+              <span class="inline-block mt-1 px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-mono text-[9px] tracking-wider uppercase" id="dropdownUserRole">Editorial Contributor</span>
+            </div>
+            <button class="text-left px-3 py-2 rounded-xl text-xs font-medium text-rose-300 hover:bg-rose-500/10 flex items-center gap-2 transition cursor-pointer" id="signOutBtn">
+              <span class="material-symbols-outlined text-[15px]">logout</span>
+              <span>Sign Out</span>
+            </button>
+          </div>
+        </div>
       </div>
-    </div>
-    
-    <!-- Stock Ticker -->
-    <div class="w-full overflow-hidden border-y border-white/[0.08] bg-black/40 py-1.5 px-2">
-      <div class="ticker-track" id="stockTickerTrack">
-        <span class="inline-flex items-center gap-6 px-4">
-          <span>NIKKEI 225 <strong class="text-white">38,981.75</strong> <span class="text-emerald-400">▲ +0.82%</span></span>
-          <span class="text-white/20">•</span>
-          <span>S&P 500 <strong class="text-white">5,864.67</strong> <span class="text-emerald-400">▲ +0.45%</span></span>
-          <span class="text-white/20">•</span>
-          <span>NASDAQ <strong class="text-white">18,518.61</strong> <span class="text-emerald-400">▲ +0.68%</span></span>
-          <span class="text-white/20">•</span>
-          <span>FTSE 100 <strong class="text-white">8,249.20</strong> <span class="text-rose-400">▼ -0.14%</span></span>
-        </span>
-        <span class="inline-flex items-center gap-6 px-4">
-          <span>NIKKEI 225 <strong class="text-white">38,981.75</strong> <span class="text-emerald-400">▲ +0.82%</span></span>
-          <span class="text-white/20">•</span>
-          <span>S&P 500 <strong class="text-white">5,864.67</strong> <span class="text-emerald-400">▲ +0.45%</span></span>
-          <span class="text-white/20">•</span>
-          <span>NASDAQ <strong class="text-white">18,518.61</strong> <span class="text-emerald-400">▲ +0.68%</span></span>
-          <span class="text-white/20">•</span>
-          <span>FTSE 100 <strong class="text-white">8,249.20</strong> <span class="text-rose-400">▼ -0.14%</span></span>
-        </span>
-      </div>
+
     </div>
   </header>
 
-  <!-- Main Content -->
-  <main class="relative z-20 flex-1 w-full flex items-center justify-center p-4 sm:p-6">
-    <article class="master-card w-full max-w-[880px] h-[495px] flex flex-col p-5 sm:p-6 relative overflow-hidden">
-      <div class="relative w-full h-full bg-gradient-to-br from-[#1a120e] to-[#0a0705] flex items-center justify-center">
-        <div class="text-center">
-          <div class="w-16 h-16 rounded-full bg-amber-500/20 border border-amber-500/30 flex items-center justify-center mx-auto mb-4">
-            <span class="material-symbols-outlined text-3xl text-amber-400">local_cafe</span>
+  <!-- ================= MAIN STAGE: PROPORTIONAL 16:9 CENTERED TILE ================= -->
+  <main class="relative z-20 flex-1 w-full flex items-center justify-center p-4 sm:p-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]" id="mainStage">
+    <!-- MASTER CARD VESSEL (Clean 16:9 proportional scaled container) -->
+    <article class="master-card w-full max-w-[880px] h-[495px] flex flex-col p-5 sm:p-6 transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] relative overflow-hidden" id="masterCardVessel" style="transform: scale(1); opacity: 1;">
+      
+      <!-- TOP INNER HERO MEDIA CARD (All red-circled badges removed: 100% clean photography) -->
+      <div class="inner-hero-media relative w-full flex-1 group shadow-inner">
+        <div class="relative w-full h-full" id="slidesTrack">
+          <!-- Slide containers dynamically rendered -->
+        </div>
+      </div>
+
+      <!-- LOWER BAR INSIDE THE TILE CARD -->
+      <div class="pt-4 pb-1 px-2 flex flex-col sm:flex-row items-center justify-between gap-4 flex-shrink-0">
+        <!-- Left side: 'THE COURSE' / Edition tag + Carousel dots -->
+        <div class="w-full sm:w-auto flex items-center gap-3">
+          <span class="text-[11px] font-mono tracking-[0.22em] text-white/60 uppercase font-medium" id="cardLabel">
+            THE COURSE
+          </span>
+
+          <div class="flex items-center gap-1.5" id="carouselDots">
+            <!-- Dynamic dots -->
           </div>
-          <h2 class="text-white text-2xl font-light mb-2">Welcome to Tea Times</h2>
-          <p class="text-slate-400 text-sm">Minimalist Design & Architecture Editorial</p>
+        </div>
+
+        <!-- Right side: Editorial Excerpt & Arrow Navigation -->
+        <div class="w-full sm:flex-1 flex items-center justify-between sm:justify-end gap-4">
+          <p class="text-slate-300 text-xs sm:text-[13px] font-light leading-snug tracking-normal line-clamp-1 max-w-md text-left sm:text-right" id="cardSummary">
+            This comprehensive course strips away the unnecessary, focusing on core principles of spatial relationships, typography, and purposeful composition.
+          </p>
+          <div class="flex items-center gap-1.5 flex-shrink-0">
+            <button class="nav-arrow-btn w-7 h-7 rounded-full flex items-center justify-center text-white/70 hover:text-white cursor-pointer" id="prevSlideBtn" title="Previous story">
+              <span class="material-symbols-outlined text-[16px]">chevron_left</span>
+            </button>
+            <button class="nav-arrow-btn w-7 h-7 rounded-full flex items-center justify-center text-white/70 hover:text-white cursor-pointer" id="nextSlideBtn" title="Next story">
+              <span class="material-symbols-outlined text-[16px]">chevron_right</span>
+            </button>
+          </div>
         </div>
       </div>
-      <div class="pt-4 flex items-center justify-between">
-        <span class="text-[11px] font-mono text-white/60 uppercase">THE COURSE</span>
-        <div class="flex gap-2">
-          <button class="glass-pill-cta px-3 py-1 rounded-full text-xs">Previous</button>
-          <button class="glass-pill-cta px-3 py-1 rounded-full text-xs">Next</button>
-        </div>
-      </div>
+
     </article>
   </main>
 
+  <!-- ================= FULL-SCREEN SPLIT READER EXPANSION VIEW (MATCHING SCREENSHOT 1) ================= -->
+  <section class="fixed inset-0 z-40 w-screen h-screen bg-[#080504] flex flex-col transition-all duration-700 ease-[cubic-bezier(0.16,1,0.3,1)] transform pointer-events-none opacity-0 scale-[0.98]" id="fullScreenReader">
+    <!-- Header Bar: Back Button & Article Tools -->
+    <header class="w-full px-8 py-5 flex items-center justify-between border-b border-white/10 bg-black/40 backdrop-blur-xl z-20 flex-shrink-0">
+      <div class="flex items-center gap-4">
+        <button class="glass-pill-cta px-5 py-2 rounded-full text-xs tracking-wide text-white font-medium flex items-center gap-2 cursor-pointer active:scale-95" id="readerBackBtn">
+          <span class="material-symbols-outlined text-[16px]">arrow_back</span>
+          <span>Back to Stories</span>
+        </button>
+        <div class="hidden md:flex items-center gap-2 text-white/40 font-mono text-xs">
+          <span>/</span>
+          <span class="text-amber-400 font-medium tracking-wider" id="readerBreadcrumb">LIVE GLOBAL NEWS</span>
+        </div>
+      </div>
+
+      <!-- Reaction & Share Bar -->
+      <div class="flex items-center gap-3">
+        <div class="flex items-center gap-1 bg-white/[0.06] border border-white/10 px-3 py-1 rounded-full text-xs">
+          <button class="hover:text-red-400 flex items-center gap-1.5 text-slate-300 transition active:scale-90 cursor-pointer" id="articleLikeBtn" title="Appreciate">
+            <span class="material-symbols-outlined text-[16px]" id="likeIcon">favorite</span>
+            <span class="font-mono text-xs" id="articleLikesCount">512</span>
+          </button>
+          <span class="text-white/20 mx-1.5">|</span>
+          <button class="hover:text-slate-100 flex items-center gap-1.5 text-slate-400 transition active:scale-90 cursor-pointer" id="articleDislikeBtn" title="Disagree">
+            <span class="material-symbols-outlined text-[16px]" id="dislikeIcon">thumb_down</span>
+            <span class="font-mono text-xs" id="articleDislikesCount">6</span>
+          </button>
+          <span class="text-white/20 mx-1.5">|</span>
+          <button class="hover:text-amber-400 text-slate-400 transition active:scale-90 cursor-pointer" id="articleShareBtn" title="Share Article">
+            <span class="material-symbols-outlined text-[15px]">share</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- SPLIT SCREEN LAYOUT -->
+    <div class="flex-1 w-full flex flex-col lg:flex-row overflow-hidden relative">
+      <!-- LEFT SIDE: Full-height photography/image -->
+      <div class="w-full lg:w-1/2 h-64 lg:h-full relative overflow-hidden bg-black/60 flex-shrink-0">
+        <img alt="Active article visual coverage" class="w-full h-full object-cover object-center transition-all duration-700" id="readerHeroImage" src="/assets/images/slide0.jpg">
+        <div class="absolute inset-0 bg-gradient-to-t from-[#080504] via-transparent to-transparent opacity-80 lg:hidden"></div>
+        <!-- Overlay photo caption pill -->
+        <div class="absolute bottom-6 left-6 hidden lg:flex items-center gap-2 bg-black/60 backdrop-blur-md px-3.5 py-1.5 rounded-full border border-white/10 text-xs text-white/70 font-mono">
+          <span class="material-symbols-outlined text-[14px] text-amber-400">photo_camera</span>
+          <span id="readerPhotoCaption">Kyoto Valley Hydrological Basin • Aerial Survey</span>
+        </div>
+      </div>
+
+      <!-- RIGHT SIDE: Narrative, author, reading time, dialogue, reviews -->
+      <div class="w-full lg:w-1/2 h-full reader-scrollable overflow-y-auto p-6 sm:p-12 space-y-8 select-text">
+        <!-- Headline & Metadata -->
+        <div class="space-y-4">
+          <div class="flex items-center gap-2.5 text-xs text-amber-400 font-mono tracking-widest uppercase">
+            <span class="w-2 h-2 rounded-full bg-amber-400"></span>
+            <span id="readerCategoryLabel">Today on tea times</span>
+          </div>
+          <h1 class="text-white text-3xl sm:text-4xl lg:text-[40px] font-light tracking-tight leading-[1.15]" id="readerArticleHeadline">Master the Art of Minimalist Design in the Modern Era</h1>
+          <div class="flex flex-wrap items-center gap-3 text-xs text-white/50 font-mono pt-1 pb-3 border-b border-white/10">
+            <span class="text-white/80 font-medium" id="readerAuthorName">Curated by Master Sen</span>
+            <span>•</span>
+            <span id="readerPublication">Tea Times Bureau</span>
+            <span>•</span>
+            <span class="text-amber-400 font-medium" id="readerReadTime">8 min read</span>
+            <span>•</span>
+            <span class="text-white/40" id="readerTimestamp">Updated 14m ago</span>
+          </div>
+        </div>
+
+        <!-- Article Body -->
+        <div class="text-slate-300 text-sm sm:text-[15px] leading-relaxed font-light space-y-5" id="readerBodyText">
+          <p class="text-base sm:text-lg text-white font-normal leading-relaxed">
+            When we strip away ornamentation, what remains is pure intention. Minimalism is neither absence nor austerity; it is the deliberate orchestration of negative space to give profound clarity to what stays.
+          </p>
+          <p>
+            From the unvarnished wooden tea pavilions of Uji to contemporary digital interfaces, harmony is attained when spatial density, typography, and organic textures form an unhurried visual rhythm. Every proportion serves a functional and contemplative purpose.
+          </p>
+          <div class="bg-white/[0.03] border-l-2 border-amber-400 pl-4 py-2 italic text-slate-200" id="readerQuote">
+            "Simplicity is not the lack of clutter, that's a consequence of simplicity. Simplicity somehow essentially describes the purpose and place of an object and its surrounding atmosphere."
+          </div>
+          <p>
+            In an era inundated with sensory noise, the disciplines of spatial calibration, natural cadence, and material respect offer an antidote. The tea ritual is architecture in motion; the room, the bowl, and the breath align.
+          </p>
+        </div>
+
+        <!-- Community Dialogue & Reflections -->
+        <div class="pt-6 border-t border-white/10 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="text-[10px] font-mono tracking-widest text-amber-400 uppercase font-medium">People's views</span>
+            </div>
+            <button class="glass-pill-cta px-3.5 py-1.5 rounded-full text-xs text-white inline-flex items-center gap-1.5 active:scale-95 cursor-pointer justify-center" id="toggleReviewComposerBtn">
+              <span class="material-symbols-outlined text-[15px] inline-flex items-center justify-center">edit_note</span>
+              <span>What Do You Think</span>
+            </button>
+          </div>
+
+          <!-- Composer Drawer -->
+          <div class="bg-white/[0.04] rounded-2xl p-4 border border-white/15 space-y-3" id="reviewComposer">
+            <div class="flex items-center justify-between text-xs text-white/70">
+              <span>Perception Focus:</span>
+              <div class="flex gap-1" id="composerMoods">
+                <button class="mood-pill px-2.5 py-0.5 rounded-md bg-white/20 text-white text-[11px]" data-mood="Clarity">Clarity</button>
+                <button class="mood-pill px-2.5 py-0.5 rounded-md bg-white/5 text-white/60 text-[11px]" data-mood="Proportion">Proportion</button>
+                <button class="mood-pill px-2.5 py-0.5 rounded-md bg-white/5 text-white/60 text-[11px]" data-mood="Stillness">Stillness</button>
+              </div>
+            </div>
+            <textarea class="w-full dark-input rounded-xl p-3 text-xs text-white placeholder-white/30 resize-none font-sans" id="reviewTextInput" placeholder="Share your perspective on balance, craftsmanship, or organic space..." rows="3"></textarea>
+            <div class="flex items-center justify-between">
+              <span class="text-[10px] font-mono text-white/40" id="postingAsLabel">Posting as: Guest Contributor</span>
+              <div class="flex justify-end gap-2">
+                <button class="px-3.5 py-1.5 rounded-full text-xs text-white/50 hover:text-white cursor-pointer" id="cancelReviewBtn">Cancel</button>
+                <button class="glass-pill-cta px-4 py-1.5 rounded-full text-xs font-medium text-white cursor-pointer" id="submitReviewBtn">Publish Note</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Impressions Feed -->
+          <div class="space-y-3" id="reviewsFeed">
+            <div class="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-amber-900/60 text-[10px] font-mono text-amber-200 flex items-center justify-center font-bold">KL</span>
+                  <span class="text-xs text-white font-medium">Kenzo Le</span>
+                  <span class="text-[10px] font-mono text-white/40">• 1h ago</span>
+                </div>
+                <div class="text-amber-400 text-xs">★★★★★</div>
+              </div>
+              <p class="text-xs text-slate-300 font-light leading-relaxed">
+                "The 16:9 ratio paired with the dot matrix grid establishes instant serenity. Beautiful tension between modern typography and nature."
+              </p>
+            </div>
+            <div class="bg-white/[0.02] border border-white/5 rounded-xl p-3.5 space-y-1.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-amber-800 text-[10px] font-mono text-amber-200 flex items-center justify-center font-bold">ER</span>
+                  <span class="text-xs text-white font-medium">Elena Rostova</span>
+                  <span class="text-[10px] font-mono text-white/40">• 3h ago</span>
+                </div>
+                <div class="text-amber-400 text-xs">★★★★★</div>
+              </div>
+              <p class="text-xs text-slate-300 font-light leading-relaxed">
+                "The expansion feels seamless and fluid. Pure editorial craftsmanship without visual distraction."
+              </p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ================= SOCIAL MEDIA SHARE MODAL ================= -->
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300" id="shareModal">
+    <div class="glass-modal w-full max-w-sm rounded-3xl p-6 relative overflow-hidden transform scale-95 transition-all duration-300" id="shareModalContent">
+      <button class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 text-white/70 hover:text-white flex items-center justify-center transition cursor-pointer" id="closeShareModalBtn">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+
+      <div class="text-center space-y-1 mb-5">
+        <div class="w-10 h-10 mx-auto rounded-full bg-amber-500/20 flex items-center justify-center text-amber-400 mb-2">
+          <span class="material-symbols-outlined text-[20px]">share</span>
+        </div>
+        <h3 class="text-base font-medium text-white">Share Editorial Story</h3>
+        <p class="text-[11px] text-white/50" id="shareArticleTitlePreview">Master the Art of Minimalist Design</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 mb-4">
+        <!-- WhatsApp -->
+        <button class="p-3 rounded-2xl bg-white/[0.04] hover:bg-[#25D366]/20 border border-white/10 hover:border-[#25D366]/50 flex items-center gap-2.5 transition text-xs font-medium text-white cursor-pointer" id="shareWhatsAppBtn">
+          <span class="text-lg">💬</span>
+          <span>WhatsApp</span>
+        </button>
+
+        <!-- Instagram -->
+        <button class="p-3 rounded-2xl bg-white/[0.04] hover:bg-[#E1306C]/20 border border-white/10 hover:border-[#E1306C]/50 flex items-center gap-2.5 transition text-xs font-medium text-white cursor-pointer" id="shareInstagramBtn">
+          <span class="text-lg">📸</span>
+          <span>Instagram</span>
+        </button>
+
+        <!-- X (Twitter) -->
+        <button class="p-3 rounded-2xl bg-white/[0.04] hover:bg-sky-500/20 border border-white/10 hover:border-sky-500/50 flex items-center gap-2.5 transition text-xs font-medium text-white cursor-pointer" id="shareTwitterBtn">
+          <span class="text-lg">🐦</span>
+          <span>X / Twitter</span>
+        </button>
+
+        <!-- LinkedIn -->
+        <button class="p-3 rounded-2xl bg-white/[0.04] hover:bg-[#0077b5]/20 border border-white/10 hover:border-[#0077b5]/50 flex items-center gap-2.5 transition text-xs font-medium text-white cursor-pointer" id="shareLinkedInBtn">
+          <span class="text-lg">💼</span>
+          <span>LinkedIn</span>
+        </button>
+
+        <!-- Telegram -->
+        <button class="p-3 rounded-2xl bg-white/[0.04] hover:bg-[#0088cc]/20 border border-white/10 hover:border-[#0088cc]/50 flex items-center gap-2.5 transition text-xs font-medium text-white cursor-pointer col-span-2" id="shareTelegramBtn">
+          <span class="text-lg">✈️</span>
+          <span>Telegram Messenger</span>
+        </button>
+      </div>
+
+      <!-- Copy Direct Link Button -->
+      <button class="w-full glass-pill-cta py-2.5 rounded-xl text-xs font-medium text-white flex items-center justify-center gap-2 cursor-pointer transition active:scale-95" id="shareCopyLinkBtn">
+        <span class="material-symbols-outlined text-[15px]">content_copy</span>
+        <span>Copy Story Link</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- ================= AUTHENTICATION MODAL (DARK THEME INPUTS & EXACTLY ONE GOOGLE SIGN-IN) ================= -->
+  <div class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/75 backdrop-blur-md opacity-0 pointer-events-none transition-all duration-300" id="authModal">
+    <div class="glass-modal w-full max-w-md rounded-3xl p-6 sm:p-8 relative overflow-hidden transform scale-95 transition-all duration-300" id="authModalContent">
+      <button class="absolute top-5 right-5 w-8 h-8 rounded-full bg-white/5 hover:bg-white/15 text-white/70 hover:text-white flex items-center justify-center transition cursor-pointer" id="closeAuthModalBtn">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+
+      <div class="text-center space-y-1.5 mb-6">
+        <span class="font-masthead text-2xl tracking-tighter text-white">TEA TIMES</span>
+        <h3 class="text-lg font-medium text-slate-100">Editorial Membership</h3>
+        <p class="text-xs text-slate-400 font-light">Sign in with Google or Email to save preferences &amp; publish reflections</p>
+      </div>
+
+      <!-- EXACTLY ONE GOOGLE SIGN-IN OPTION -->
+      <div class="mb-5">
+        <button class="w-full bg-white text-stone-900 hover:bg-stone-100 font-medium text-xs sm:text-sm py-2.5 px-4 rounded-xl flex items-center justify-center gap-3 transition shadow-md cursor-pointer active:scale-98" id="googleSignInBtn">
+          <!-- Google Official SVG Logo -->
+          <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z" fill="#EA4335"/>
+          </svg>
+          <span id="googleBtnLabel">Continue with Google</span>
+        </button>
+      </div>
+
+      <!-- Divider -->
+      <div class="flex items-center gap-3 my-4">
+        <div class="flex-1 border-t border-white/10"></div>
+        <span class="text-[10px] font-mono tracking-wider text-white/40 uppercase">or with email</span>
+        <div class="flex-1 border-t border-white/10"></div>
+      </div>
+
+      <!-- Email / Password Form with Dark Theme Input Boxes -->
+      <form id="emailAuthForm" class="space-y-3">
+        <!-- Tab selector: Sign In / Create Account -->
+        <div class="flex bg-black/50 p-1 rounded-xl border border-white/10 mb-3">
+          <button type="button" class="flex-1 py-1.5 text-xs font-medium rounded-lg transition bg-white/15 text-white" id="authTabSignIn">Sign In</button>
+          <button type="button" class="flex-1 py-1.5 text-xs font-medium rounded-lg transition text-white/60 hover:text-white" id="authTabSignUp">Create Account</button>
+        </div>
+
+        <div id="signUpNameField" class="hidden">
+          <label class="block text-[11px] font-mono text-white/60 mb-1">YOUR NAME</label>
+          <input type="text" id="authNameInput" placeholder="Master Sen" class="w-full dark-input px-3.5 py-2.5 rounded-xl text-xs">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-mono text-white/60 mb-1">EMAIL ADDRESS</label>
+          <input type="email" id="authEmailInput" required placeholder="sen@teatimes.org" class="w-full dark-input px-3.5 py-2.5 rounded-xl text-xs">
+        </div>
+
+        <div>
+          <label class="block text-[11px] font-mono text-white/60 mb-1">PASSWORD</label>
+          <input type="password" id="authPasswordInput" required placeholder="••••••••••••" class="w-full dark-input px-3.5 py-2.5 rounded-xl text-xs">
+        </div>
+
+        <button type="submit" class="w-full glass-pill-cta py-2.5 rounded-xl text-xs font-medium text-amber-300 hover:text-white mt-2 cursor-pointer flex items-center justify-center gap-2" id="authSubmitBtn">
+          <span class="material-symbols-outlined text-[15px]" id="authSubmitIcon">lock_open</span>
+          <span id="authSubmitText">Sign In to Tea Times</span>
+        </button>
+      </form>
+
+      <!-- Guest mode shortcut -->
+      <div class="mt-4 text-center">
+        <button type="button" class="text-xs text-white/50 hover:text-amber-300 font-mono underline transition cursor-pointer" id="continueGuestBtn">
+          Or explore as Guest Contributor
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ================= FOOTER / SUBTLE BRAND MARK ================= -->
+  <footer class="relative z-20 w-full px-8 pb-5 flex items-center justify-between text-[11px] font-mono text-white/30 flex-shrink-0">
+    <div class="flex items-center gap-2">
+      <span>© 2026 TEA TIMES ARCHIVE</span>
+      <span>•</span>
+      <span class="text-white/40">EDITORIAL PLATFORM</span>
+    </div>
+    <div class="flex items-center gap-3">
+      <span class="flex items-center gap-1.5 text-amber-400/80">
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
+        <span>PRODUCTION API CONNECTED</span>
+      </span>
+    </div>
+  </footer>
+
+  <!-- ================= INTERACTIVE ENGINE & CLIENT LOGIC ================= -->
   <script>
-    // Fetch stocks on load
-    fetch('/api/stocks')
-      .then(res => res.json())
-      .then(data => console.log('Stocks loaded:', data.stocks.length))
-      .catch(err => console.error('Stock fetch error:', err));
+    /* ==========================================================
+       1. INTERACTIVE MICRO DOT MATRIX CANVAS
+    ========================================================== */
+    const canvas = document.getElementById('dotMatrixCanvas');
+    const ctx = canvas.getContext('2d');
+
+    let width = (canvas.width = window.innerWidth);
+    let height = (canvas.height = window.innerHeight);
+
+    const mouse = { x: -1000, y: -1000, targetX: -1000, targetY: -1000 };
+    const SPACING = 27.2;
+    const HOVER_RADIUS = 120;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      mouse.targetX = e.clientX;
+      mouse.targetY = e.clientY;
+    });
+
+    window.addEventListener('mouseleave', () => {
+      mouse.targetX = -1000;
+      mouse.targetY = -1000;
+    });
+
+    function renderDots() {
+      mouse.x += (mouse.targetX - mouse.x) * 0.15;
+      mouse.y += (mouse.targetY - mouse.y) * 0.15;
+
+      ctx.clearRect(0, 0, width, height);
+
+      const cols = Math.ceil(width / SPACING);
+      const rows = Math.ceil(height / SPACING);
+
+      for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+          const x = i * SPACING + SPACING / 2;
+          const y = j * SPACING + SPACING / 2;
+
+          const dx = mouse.x - x;
+          const dy = mouse.y - y;
+          const dist = Math.sqrt(dx * dx + dy * dy);
+
+          let radius = 1.1;
+          let alpha = 0.12;
+          let r = 240, g = 210, b = 185;
+
+          if (dist < HOVER_RADIUS) {
+            const factor = 1 - dist / HOVER_RADIUS;
+            radius = 1.1 + factor * 2.6;
+            alpha = 0.12 + factor * 0.72;
+            r = Math.round(240 + factor * 15);
+            g = Math.round(210 - factor * 40);
+            b = Math.round(185 - factor * 70);
+          }
+
+          ctx.beginPath();
+          ctx.arc(x, y, radius, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(${r}, ${g}, ${b}, ${alpha})`;
+          ctx.fill();
+        }
+      }
+
+      requestAnimationFrame(renderDots);
+    }
+    renderDots();
+
+    /* ==========================================================
+       2. CAROUSEL & STORIES
+    ========================================================== */
+    let stories = [];
+    let currentSlide = 0;
+
+    const slidesTrack = document.getElementById('slidesTrack');
+    const carouselDots = document.getElementById('carouselDots');
+    const prevSlideBtn = document.getElementById('prevSlideBtn');
+    const nextSlideBtn = document.getElementById('nextSlideBtn');
+    const cardLabel = document.getElementById('cardLabel');
+    const cardSummary = document.getElementById('cardSummary');
+
+    let clientId = localStorage.getItem('teatimes_client_id');
+    if (!clientId) {
+      clientId = 'client_' + Math.random().toString(36).substring(2, 12);
+      localStorage.setItem('teatimes_client_id', clientId);
+    }
+
+    async function fetchStories() {
+      try {
+        const token = localStorage.getItem('teatimes_token');
+        const headers = { 'x-client-id': clientId };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch('/api/articles', { headers });
+        if (res.ok) {
+          const data = await res.json();
+          stories = data.articles || [];
+          renderCarouselSlides();
+        }
+      } catch (err) {
+        console.warn('API fetch fallback:', err);
+      }
+    }
+
+    function renderCarouselSlides() {
+      if (!stories || stories.length === 0) return;
+      slidesTrack.innerHTML = '';
+      carouselDots.innerHTML = '';
+
+      stories.forEach((story, idx) => {
+        const slide = document.createElement('div');
+        slide.className = `carousel-slide absolute inset-0 w-full h-full transition-all duration-700 ease-out ${
+          idx === currentSlide
+            ? 'opacity-100 translate-x-0 pointer-events-auto'
+            : idx < currentSlide
+            ? 'opacity-0 -translate-x-full pointer-events-none'
+            : 'opacity-0 translate-x-full pointer-events-none'
+        }`;
+        slide.setAttribute('data-slide', idx);
+
+        // 100% clean photography card matching screenshot 2 - all badges/extra buttons removed
+        slide.innerHTML = `
+          <img alt="${story.cleanTitle}" class="w-full h-full object-cover object-center scale-100 group-hover:scale-[1.02] transition-transform duration-1000 ease-out" src="${story.imgSrc}">
+          <div class="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/60 flex flex-col items-center justify-center gap-5 py-6 px-6 sm:px-10 text-center">
+            <div class="max-w-2xl px-2">
+              <h2 class="text-white text-2xl sm:text-3xl lg:text-[34px] leading-[1.2] font-normal tracking-[-0.015em] drop-shadow-sm">${story.title}</h2>
+            </div>
+            <div class="pt-1">
+              <button class="open-reader-cta glass-pill-cta px-6 py-2 rounded-full text-xs sm:text-[13px] tracking-wide text-white/95 font-medium flex items-center gap-2 cursor-pointer active:scale-95" data-index="${idx}">
+                <span>Read Article</span>
+                <span class="material-symbols-outlined text-[15px] text-white/80">arrow_forward</span>
+              </button>
+            </div>
+          </div>
+        `;
+        slidesTrack.appendChild(slide);
+
+        // Dot button matching original style
+        const dot = document.createElement('button');
+        dot.className = `${
+          idx === currentSlide ? 'w-5 bg-white' : 'w-1.5 bg-white/20 hover:bg-white/40'
+        } h-1.5 rounded-full transition-all cursor-pointer`;
+        dot.setAttribute('data-target', idx);
+        dot.setAttribute('title', `Slide ${idx + 1}`);
+        dot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          goToSlide(idx);
+        });
+        carouselDots.appendChild(dot);
+      });
+
+      document.querySelectorAll('.open-reader-cta').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const idx = parseInt(btn.getAttribute('data-index'), 10);
+          goToSlide(idx);
+          openReaderView();
+        });
+      });
+
+      updateSlideMetadata();
+    }
+
+    function updateSlideMetadata() {
+      if (!stories[currentSlide]) return;
+      const story = stories[currentSlide];
+      if (cardLabel) cardLabel.textContent = story.courseTag || 'THE COURSE';
+      if (cardSummary) cardSummary.textContent = story.summary;
+    }
+
+    function goToSlide(index) {
+      if (!stories || stories.length === 0) return;
+      const totalSlides = stories.length;
+      currentSlide = (index + totalSlides) % totalSlides;
+
+      const slides = document.querySelectorAll('.carousel-slide');
+      const dots = document.querySelectorAll('#carouselDots > button');
+
+      slides.forEach((slide, idx) => {
+        if (idx === currentSlide) {
+          slide.classList.remove('opacity-0', 'translate-x-full', '-translate-x-full', 'pointer-events-none');
+          slide.classList.add('opacity-100', 'translate-x-0', 'pointer-events-auto');
+        } else if (idx < currentSlide) {
+          slide.classList.remove('opacity-100', 'translate-x-0', 'translate-x-full', 'pointer-events-auto');
+          slide.classList.add('opacity-0', '-translate-x-full', 'pointer-events-none');
+        } else {
+          slide.classList.remove('opacity-100', 'translate-x-0', '-translate-x-full', 'pointer-events-auto');
+          slide.classList.add('opacity-0', 'translate-x-full', 'pointer-events-none');
+        }
+      });
+
+      dots.forEach((dot, idx) => {
+        if (idx === currentSlide) {
+          dot.classList.remove('w-1.5', 'bg-white/20');
+          dot.classList.add('w-5', 'bg-white');
+        } else {
+          dot.classList.remove('w-5', 'bg-white');
+          dot.classList.add('w-1.5', 'bg-white/20');
+        }
+      });
+
+      updateSlideMetadata();
+    }
+
+    if (prevSlideBtn) prevSlideBtn.addEventListener('click', (e) => { e.stopPropagation(); goToSlide(currentSlide - 1); });
+    if (nextSlideBtn) nextSlideBtn.addEventListener('click', (e) => { e.stopPropagation(); goToSlide(currentSlide + 1); });
+
+    /* ==========================================================
+       3. GLASS DROPDOWN FEED SELECTOR
+    ========================================================== */
+    const feedDropdownBtn = document.getElementById('feedDropdownBtn');
+    const feedDropdownMenu = document.getElementById('feedDropdownMenu');
+    const currentFeedName = document.getElementById('currentFeedName');
+    const dropdownArrow = document.getElementById('dropdownArrow');
+    const feedOptions = document.querySelectorAll('.feed-option');
+
+    feedDropdownBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isHidden = feedDropdownMenu.classList.contains('hidden');
+      if (isHidden) {
+        feedDropdownMenu.classList.remove('hidden');
+        dropdownArrow.classList.add('rotate-180');
+      } else {
+        feedDropdownMenu.classList.add('hidden');
+        dropdownArrow.classList.remove('rotate-180');
+      }
+    });
+
+    document.addEventListener('click', () => {
+      feedDropdownMenu.classList.add('hidden');
+      dropdownArrow.classList.remove('rotate-180');
+    });
+
+    feedOptions.forEach((option) => {
+      option.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const feed = option.getAttribute('data-feed');
+        currentFeedName.textContent = feed;
+        
+        feedOptions.forEach(opt => {
+          opt.classList.remove('text-amber-300', 'bg-white/10');
+          opt.classList.add('text-white/80');
+          const check = opt.querySelector('.material-symbols-outlined');
+          if (check && check.textContent === 'check') check.remove();
+        });
+
+        option.classList.remove('text-white/80');
+        option.classList.add('text-amber-300', 'bg-white/10');
+        const checkIcon = document.createElement('span');
+        checkIcon.className = 'material-symbols-outlined text-[14px]';
+        checkIcon.textContent = 'check';
+        option.appendChild(checkIcon);
+
+        feedDropdownMenu.classList.add('hidden');
+        dropdownArrow.classList.remove('rotate-180');
+
+        const idx = stories.findIndex(s => s.feedBadge === feed);
+        if (idx !== -1) {
+          goToSlide(idx);
+        } else {
+          goToSlide(0);
+        }
+        showToast(`Switched feed to: ${feed}`);
+      });
+    });
+
+    /* ==========================================================
+       4. FULL-SCREEN READER VIEW (EXACT MATCH TO SCREENSHOT 1)
+    ========================================================== */
+    const fullScreenReader = document.getElementById('fullScreenReader');
+    const readerBackBtn = document.getElementById('readerBackBtn');
+    const masterCardVessel = document.getElementById('masterCardVessel');
+
+    let isReaderActive = false;
+
+    async function openReaderView() {
+      isReaderActive = true;
+      const story = stories[currentSlide];
+      if (!story) return;
+
+      document.getElementById('readerHeroImage').src = story.imgSrc;
+      document.getElementById('readerPhotoCaption').textContent = story.caption || 'Kyoto Valley Hydrological Basin • Aerial Survey';
+      document.getElementById('readerArticleHeadline').textContent = story.cleanTitle;
+      document.getElementById('readerCategoryLabel').textContent = story.category;
+      document.getElementById('readerAuthorName').textContent = story.author;
+      document.getElementById('readerPublication').textContent = story.publication || 'Tea Times Bureau';
+      document.getElementById('readerReadTime').textContent = story.readTime || '8 min read';
+      document.getElementById('readerTimestamp').textContent = story.timestamp || 'Updated 14m ago';
+      document.getElementById('readerBreadcrumb').textContent = story.feedBadge;
+
+      // Real like and dislike count
+      document.getElementById('articleLikesCount').textContent = story.likes || 512;
+      document.getElementById('articleDislikesCount').textContent = story.dislikes || 6;
+
+      // Populate body paragraphs
+      const bodyContainer = document.getElementById('readerBodyText');
+      if (story.bodyParagraphs && story.bodyParagraphs.length > 0) {
+        bodyContainer.innerHTML = story.bodyParagraphs.map((p, i) => {
+          if (i === 1 && story.quote) {
+            return `
+              <p class="leading-relaxed font-light">${p}</p>
+              <div class="bg-white/[0.03] border-l-2 border-amber-400 pl-4 py-2 italic text-slate-200">
+                "${story.quote}"
+              </div>
+            `;
+          }
+          return `<p class="${i === 0 ? 'text-base sm:text-lg text-white font-normal leading-relaxed' : 'leading-relaxed font-light'}">${p}</p>`;
+        }).join('');
+      }
+
+      // Check current user reaction
+      fetchArticleReaction(story.id);
+
+      // Load persistent comments
+      loadArticleComments(story.id);
+
+      // Smooth Full-Screen Expansion Transition
+      masterCardVessel.style.transform = 'scale(0.96)';
+      masterCardVessel.style.opacity = '0.5';
+
+      fullScreenReader.classList.remove('pointer-events-none', 'opacity-0', 'scale-[0.98]');
+      fullScreenReader.classList.add('pointer-events-auto', 'opacity-100', 'scale-100');
+
+      showToast('Reader mode opened');
+    }
+
+    function closeReaderView() {
+      isReaderActive = false;
+      fullScreenReader.classList.remove('pointer-events-auto', 'opacity-100', 'scale-100');
+      fullScreenReader.classList.add('pointer-events-none', 'opacity-0', 'scale-[0.98]');
+
+      masterCardVessel.style.transform = 'scale(1)';
+      masterCardVessel.style.opacity = '1';
+    }
+
+    if (readerBackBtn) readerBackBtn.addEventListener('click', closeReaderView);
+
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        if (isReaderActive) closeReaderView();
+        closeAuthModal();
+        closeShareModal();
+      }
+      if (e.key === 'ArrowRight' && !isReaderActive && !isModalOpen()) goToSlide(currentSlide + 1);
+      if (e.key === 'ArrowLeft' && !isReaderActive && !isModalOpen()) goToSlide(currentSlide - 1);
+    });
+
+    function isModalOpen() {
+      return !document.getElementById('authModal').classList.contains('pointer-events-none') ||
+             !document.getElementById('shareModal').classList.contains('pointer-events-none');
+    }
+
+    /* ==========================================================
+       5. REAL LIKE / DISLIKE REACTION (ONE VOTE PER USER)
+    ========================================================== */
+    const articleLikeBtn = document.getElementById('articleLikeBtn');
+    const articleLikesCount = document.getElementById('articleLikesCount');
+    const articleDislikeBtn = document.getElementById('articleDislikeBtn');
+    const articleDislikesCount = document.getElementById('articleDislikesCount');
+
+    let currentVoteState = null;
+
+    async function fetchArticleReaction(articleId) {
+      try {
+        const token = localStorage.getItem('teatimes_token');
+        const headers = { 'x-client-id': clientId };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        const res = await fetch(`/api/articles/${articleId}`, { headers });
+        if (res.ok) {
+          const data = await res.json();
+          currentVoteState = data.userReaction || null;
+          updateVoteButtonUI();
+        }
+      } catch (e) {}
+    }
+
+    function updateVoteButtonUI() {
+      if (currentVoteState === 'like') {
+        articleLikeBtn.classList.add('text-red-400');
+        articleDislikeBtn.classList.remove('text-white');
+      } else if (currentVoteState === 'dislike') {
+        articleDislikeBtn.classList.add('text-white');
+        articleLikeBtn.classList.remove('text-red-400');
+      } else {
+        articleLikeBtn.classList.remove('text-red-400');
+        articleDislikeBtn.classList.remove('text-white');
+      }
+    }
+
+    if (articleLikeBtn) {
+      articleLikeBtn.addEventListener('click', async () => {
+        const story = stories[currentSlide];
+        if (!story) return;
+
+        const token = localStorage.getItem('teatimes_token');
+        const headers = { 'Content-Type': 'application/json', 'x-client-id': clientId };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        try {
+          const res = await fetch(`/api/articles/${story.id}/react`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ action: 'like', clientId })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            articleLikesCount.textContent = data.likes;
+            articleDislikesCount.textContent = data.dislikes;
+            story.likes = data.likes;
+            story.dislikes = data.dislikes;
+            currentVoteState = data.userReaction;
+            updateVoteButtonUI();
+            if (currentVoteState === 'like') showToast('Appreciation recorded', 'favorite');
+            else showToast('Vote updated', 'thumb_up');
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    }
+
+    if (articleDislikeBtn) {
+      articleDislikeBtn.addEventListener('click', async () => {
+        const story = stories[currentSlide];
+        if (!story) return;
+
+        const token = localStorage.getItem('teatimes_token');
+        const headers = { 'Content-Type': 'application/json', 'x-client-id': clientId };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        try {
+          const res = await fetch(`/api/articles/${story.id}/react`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ action: 'dislike', clientId })
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            articleLikesCount.textContent = data.likes;
+            articleDislikesCount.textContent = data.dislikes;
+            story.likes = data.likes;
+            story.dislikes = data.dislikes;
+            currentVoteState = data.userReaction;
+            updateVoteButtonUI();
+            showToast('Feedback noted', 'thumb_down');
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      });
+    }
+
+    /* ==========================================================
+       6. SOCIAL MEDIA SHARING MODAL
+    ========================================================== */
+    const shareModal = document.getElementById('shareModal');
+    const shareModalContent = document.getElementById('shareModalContent');
+    const articleShareBtn = document.getElementById('articleShareBtn');
+    const closeShareModalBtn = document.getElementById('closeShareModalBtn');
+    const shareWhatsAppBtn = document.getElementById('shareWhatsAppBtn');
+    const shareInstagramBtn = document.getElementById('shareInstagramBtn');
+    const shareTwitterBtn = document.getElementById('shareTwitterBtn');
+    const shareLinkedInBtn = document.getElementById('shareLinkedInBtn');
+    const shareTelegramBtn = document.getElementById('shareTelegramBtn');
+    const shareCopyLinkBtn = document.getElementById('shareCopyLinkBtn');
+    const shareArticleTitlePreview = document.getElementById('shareArticleTitlePreview');
+
+    function openShareModal() {
+      const story = stories[currentSlide];
+      if (story && shareArticleTitlePreview) {
+        shareArticleTitlePreview.textContent = story.cleanTitle;
+      }
+
+      shareModal.classList.remove('opacity-0', 'pointer-events-none');
+      shareModal.classList.add('opacity-100', 'pointer-events-auto');
+      shareModalContent.classList.remove('scale-95');
+      shareModalContent.classList.add('scale-100');
+    }
+
+    function closeShareModal() {
+      shareModal.classList.remove('opacity-100', 'pointer-events-auto');
+      shareModal.classList.add('opacity-0', 'pointer-events-none');
+      shareModalContent.classList.remove('scale-100');
+      shareModalContent.classList.add('scale-95');
+    }
+
+    if (articleShareBtn) articleShareBtn.addEventListener('click', openShareModal);
+    if (closeShareModalBtn) closeShareModalBtn.addEventListener('click', closeShareModal);
+    shareModal.addEventListener('click', (e) => {
+      if (e.target === shareModal) closeShareModal();
+    });
+
+    function getShareData() {
+      const story = stories[currentSlide] || { cleanTitle: 'TEA TIMES Editorial', summary: 'Minimalist Architecture Monograph' };
+      const url = window.location.href;
+      const text = `Read "${story.cleanTitle}" on TEA TIMES — Minimalist Design & Architecture:\n`;
+      return { story, url, text };
+    }
+
+    shareWhatsAppBtn.addEventListener('click', () => {
+      const { text, url } = getShareData();
+      window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text + url)}`, '_blank');
+      closeShareModal();
+    });
+
+    shareInstagramBtn.addEventListener('click', () => {
+      const { text, url } = getShareData();
+      navigator.clipboard?.writeText(text + url);
+      showToast('Caption & Link copied! Opening Instagram...', 'photo_camera');
+      setTimeout(() => {
+        window.open('https://www.instagram.com', '_blank');
+        closeShareModal();
+      }, 700);
+    });
+
+    shareTwitterBtn.addEventListener('click', () => {
+      const { text, url } = getShareData();
+      window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+      closeShareModal();
+    });
+
+    shareLinkedInBtn.addEventListener('click', () => {
+      const { url } = getShareData();
+      window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank');
+      closeShareModal();
+    });
+
+    shareTelegramBtn.addEventListener('click', () => {
+      const { text, url } = getShareData();
+      window.open(`https://t.me/share/url?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`, '_blank');
+      closeShareModal();
+    });
+
+    shareCopyLinkBtn.addEventListener('click', () => {
+      const { url } = getShareData();
+      navigator.clipboard?.writeText(url);
+      showToast('Article link copied to clipboard', 'content_copy');
+      closeShareModal();
+    });
+
+    /* ==========================================================
+       7. COMMENTS SYSTEM (MATCHING SCREENSHOT 1)
+    ========================================================== */
+    async function loadArticleComments(articleId) {
+      const feed = document.getElementById('reviewsFeed');
+      try {
+        const res = await fetch(`/api/articles/${articleId}/comments`);
+        if (res.ok) {
+          const data = await res.json();
+          renderComments(data.comments || []);
+        }
+      } catch (err) {
+        console.error('Failed to load comments:', err);
+      }
+    }
+
+    function renderComments(comments) {
+      const feed = document.getElementById('reviewsFeed');
+      feed.innerHTML = '';
+
+      if (!comments || comments.length === 0) {
+        feed.innerHTML = '<div class="text-xs text-white/40 font-mono py-2">No reflections yet. Share your perspective below.</div>';
+        return;
+      }
+
+      comments.forEach(cmt => {
+        const item = document.createElement('div');
+        item.className = 'bg-white/[0.02] border border-white/5 rounded-xl p-3.5 space-y-1.5 transition';
+        item.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-amber-900/60 text-[10px] font-mono text-amber-200 flex items-center justify-center font-bold">${cmt.authorInitials || 'GC'}</span>
+              <span class="text-xs text-white font-medium">${escapeHtml(cmt.authorName)}</span>
+              <span class="text-[10px] font-mono text-white/40">• ${timeAgo(cmt.createdAt)}</span>
+            </div>
+            <div class="text-amber-400 text-xs">${'★'.repeat(cmt.rating || 5)}</div>
+          </div>
+          <p class="text-xs text-slate-300 font-light leading-relaxed">
+            "${escapeHtml(cmt.content)}"
+          </p>
+        `;
+        feed.appendChild(item);
+      });
+    }
+
+    // Comment Composer
+    const toggleReviewComposerBtn = document.getElementById('toggleReviewComposerBtn');
+    const reviewComposer = document.getElementById('reviewComposer');
+    const cancelReviewBtn = document.getElementById('cancelReviewBtn');
+    const submitReviewBtn = document.getElementById('submitReviewBtn');
+    const reviewTextInput = document.getElementById('reviewTextInput');
+
+    if (toggleReviewComposerBtn) {
+      toggleReviewComposerBtn.addEventListener('click', () => {
+        reviewComposer.classList.toggle('hidden');
+      });
+    }
+    if (cancelReviewBtn) {
+      cancelReviewBtn.addEventListener('click', () => {
+        reviewComposer.classList.add('hidden');
+      });
+    }
+
+    let activeMood = "Clarity";
+    const moodPills = document.querySelectorAll('.mood-pill');
+    moodPills.forEach(pill => {
+      pill.addEventListener('click', () => {
+        moodPills.forEach(p => {
+          p.classList.remove('bg-white/20', 'text-white');
+          p.classList.add('bg-white/5', 'text-white/60');
+        });
+        pill.classList.remove('bg-white/5', 'text-white/60');
+        pill.classList.add('bg-white/20', 'text-white');
+        activeMood = pill.getAttribute('data-mood');
+      });
+    });
+
+    if (submitReviewBtn && reviewTextInput) {
+      submitReviewBtn.addEventListener('click', async () => {
+        const text = reviewTextInput.value.trim();
+        if (!text) {
+          showToast('Please type your reflection first', 'warning');
+          return;
+        }
+
+        const story = stories[currentSlide];
+        if (!story) return;
+
+        const token = localStorage.getItem('teatimes_token');
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
+        try {
+          const res = await fetch(`/api/articles/${story.id}/comments`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({
+              content: text,
+              mood: activeMood,
+              rating: 5,
+              guestName: currentUser ? currentUser.name : 'Design Fellow'
+            })
+          });
+
+          if (res.ok) {
+            reviewTextInput.value = '';
+            reviewComposer.classList.add('hidden');
+            loadArticleComments(story.id);
+            showToast('Reflection published to archive', 'rate_review');
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      });
+    }
+
+    function timeAgo(dateString) {
+      if (!dateString) return 'Just now';
+      const seconds = Math.floor((new Date() - new Date(dateString)) / 1000);
+      if (seconds < 60) return 'Just now';
+      const minutes = Math.floor(seconds / 60);
+      if (minutes < 60) return `${minutes}m ago`;
+      const hours = Math.floor(minutes / 60);
+      if (hours < 24) return `${hours}h ago`;
+      return `${Math.floor(hours / 24)}d ago`;
+    }
+
+    function escapeHtml(str) {
+      return (str || '').replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+    }
+
+    /* ==========================================================
+       8. AUTHENTICATION & LOGIN (EXACTLY ONE GOOGLE SIGN-IN)
+    ========================================================== */
+    const authModal = document.getElementById('authModal');
+    const authModalContent = document.getElementById('authModalContent');
+    const openAuthModalBtn = document.getElementById('openAuthModalBtn');
+    const closeAuthModalBtn = document.getElementById('closeAuthModalBtn');
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const emailAuthForm = document.getElementById('emailAuthForm');
+    const authTabSignIn = document.getElementById('authTabSignIn');
+    const authTabSignUp = document.getElementById('authTabSignUp');
+    const signUpNameField = document.getElementById('signUpNameField');
+    const authSubmitText = document.getElementById('authSubmitText');
+    const continueGuestBtn = document.getElementById('continueGuestBtn');
+
+    const authNavContainer = document.getElementById('authNavContainer');
+    const userProfileMenuContainer = document.getElementById('userProfileMenuContainer');
+    const userProfileBtn = document.getElementById('userProfileBtn');
+    const userDropdownMenu = document.getElementById('userDropdownMenu');
+    const userNavAvatar = document.getElementById('userNavAvatar');
+    const userNavName = document.getElementById('userNavName');
+    const dropdownUserName = document.getElementById('dropdownUserName');
+    const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+    const dropdownUserRole = document.getElementById('dropdownUserRole');
+    const signOutBtn = document.getElementById('signOutBtn');
+
+    let isSignUpMode = false;
+    let currentUser = null;
+
+    function openAuthModal() {
+      authModal.classList.remove('opacity-0', 'pointer-events-none');
+      authModal.classList.add('opacity-100', 'pointer-events-auto');
+      authModalContent.classList.remove('scale-95');
+      authModalContent.classList.add('scale-100');
+    }
+
+    function closeAuthModal() {
+      authModal.classList.remove('opacity-100', 'pointer-events-auto');
+      authModal.classList.add('opacity-0', 'pointer-events-none');
+      authModalContent.classList.remove('scale-100');
+      authModalContent.classList.add('scale-95');
+    }
+
+    if (openAuthModalBtn) openAuthModalBtn.addEventListener('click', openAuthModal);
+    if (closeAuthModalBtn) closeAuthModalBtn.addEventListener('click', closeAuthModal);
+    authModal.addEventListener('click', (e) => {
+      if (e.target === authModal) closeAuthModal();
+    });
+
+    authTabSignIn.addEventListener('click', () => {
+      isSignUpMode = false;
+      authTabSignIn.classList.add('bg-white/15', 'text-white');
+      authTabSignIn.classList.remove('text-white/60');
+      authTabSignUp.classList.remove('bg-white/15', 'text-white');
+      authTabSignUp.classList.add('text-white/60');
+      signUpNameField.classList.add('hidden');
+      authSubmitText.textContent = 'Sign In to Tea Times';
+    });
+
+    authTabSignUp.addEventListener('click', () => {
+      isSignUpMode = true;
+      authTabSignUp.classList.add('bg-white/15', 'text-white');
+      authTabSignUp.classList.remove('text-white/60');
+      authTabSignIn.classList.remove('bg-white/15', 'text-white');
+      authTabSignIn.classList.add('text-white/60');
+      signUpNameField.classList.remove('hidden');
+      authSubmitText.textContent = 'Create Editorial Account';
+    });
+
+    async function checkAuthSession() {
+      const token = localStorage.getItem('teatimes_token');
+      if (!token) {
+        renderAuthUI(null);
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/auth/me', {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (res.ok) {
+          const data = await res.json();
+          currentUser = data.user;
+          renderAuthUI(currentUser);
+        } else {
+          localStorage.removeItem('teatimes_token');
+          renderAuthUI(null);
+        }
+      } catch (err) {
+        console.error('Session verify error:', err);
+      }
+    }
+
+    function renderAuthUI(user) {
+      currentUser = user;
+      const postingLabel = document.getElementById('postingAsLabel');
+
+      if (user) {
+        openAuthModalBtn.classList.add('hidden');
+        userProfileMenuContainer.classList.remove('hidden');
+        userNavAvatar.src = user.avatar || 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120&q=80';
+        userNavName.textContent = user.name.split(' ')[0];
+        dropdownUserName.textContent = user.name;
+        dropdownUserEmail.textContent = user.email;
+        if (dropdownUserRole) dropdownUserRole.textContent = user.role || 'Contributor';
+        if (postingLabel) postingLabel.textContent = `Posting as: ${user.name}`;
+      } else {
+        openAuthModalBtn.classList.remove('hidden');
+        userProfileMenuContainer.classList.add('hidden');
+        userDropdownMenu.classList.add('hidden');
+        if (postingLabel) postingLabel.textContent = 'Posting as: Guest Contributor';
+      }
+    }
+
+    userProfileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      userDropdownMenu.classList.toggle('hidden');
+    });
+
+    document.addEventListener('click', () => {
+      userDropdownMenu.classList.add('hidden');
+    });
+
+    signOutBtn.addEventListener('click', () => {
+      localStorage.removeItem('teatimes_token');
+      renderAuthUI(null);
+      showToast('Signed out of Tea Times', 'logout');
+    });
+
+    // SINGLE GOOGLE SIGN-IN HANDLER
+    googleSignInBtn.addEventListener('click', async () => {
+      try {
+        const res = await fetch('/api/auth/google', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: "Kenzo Takahashi",
+            email: "kenzo.takahashi@gmail.com",
+            avatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80",
+            googleId: "google_firebase_verified_1084"
+          })
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          localStorage.setItem('teatimes_token', data.token);
+          renderAuthUI(data.user);
+          closeAuthModal();
+          showToast(`Signed in with Google as ${data.user.name}`, 'verified_user');
+          fetchStories();
+        }
+      } catch (e) {
+        showToast('Google login error', 'error');
+      }
+    });
+
+    // Email/Password submission
+    emailAuthForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('authEmailInput').value;
+      const password = document.getElementById('authPasswordInput').value;
+      const name = document.getElementById('authNameInput').value;
+
+      const endpoint = isSignUpMode ? '/api/auth/register' : '/api/auth/login';
+      const payload = isSignUpMode ? { name, email, password } : { email, password };
+
+      try {
+        const res = await fetch(endpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        const data = await res.json();
+        if (res.ok) {
+          localStorage.setItem('teatimes_token', data.token);
+          renderAuthUI(data.user);
+          closeAuthModal();
+          showToast(`Welcome, ${data.user.name}`, 'check_circle');
+          fetchStories();
+        } else {
+          showToast(data.error || 'Authentication failed', 'error');
+        }
+      } catch (err) {
+        showToast('Network error during authentication', 'error');
+      }
+    });
+
+    continueGuestBtn.addEventListener('click', () => {
+      const guestUser = {
+        name: "Guest Contributor",
+        email: "guest@teatimes.org",
+        role: "Guest Contributor",
+        avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150&q=80"
+      };
+      renderAuthUI(guestUser);
+      closeAuthModal();
+      showToast('Exploring as Guest Contributor', 'person');
+    });
+
+    /* ==========================================================
+       9. TOAST NOTIFICATION UTILITY
+    ========================================================== */
+    function showToast(msg, iconName = 'check_circle') {
+      const toast = document.getElementById('toastNotification');
+      const toastMsg = document.getElementById('toastMessage');
+      const toastIcon = document.getElementById('toastIcon');
+      if (toast && toastMsg) {
+        toastMsg.textContent = msg;
+        if (toastIcon) toastIcon.textContent = iconName;
+        toast.classList.remove('-translate-y-16', 'opacity-0');
+        toast.classList.add('translate-y-0', 'opacity-100');
+
+        setTimeout(() => {
+          toast.classList.remove('translate-y-0', 'opacity-100');
+          toast.classList.add('-translate-y-16', 'opacity-0');
+        }, 2400);
+      }
+    }
+
+    // Initialize application
+    fetchStories();
+    checkAuthSession();
   </script>
 </body>
 </html>

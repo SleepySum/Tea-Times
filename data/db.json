@@ -1,0 +1,204 @@
+{
+  "users": [
+    {
+      "id": "usr_admin",
+      "name": "Master Sen",
+      "email": "sen@teatimes.org",
+      "passwordHash": "$2a$10$vYqF2jG8G9e1M6VpGzU8h.vYQv1D.1zY3Qf6iW4JqX0L8P2O0vG2a",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&h=150&q=80",
+      "provider": "firebase",
+      "role": "Editor-in-Chief",
+      "preferences": [
+        "Live Global News",
+        "Artisan Terroir",
+        "Vessels & Craft"
+      ],
+      "createdAt": "2026-10-29T00:00:00.000Z"
+    }
+  ],
+  "articles": [
+    {
+      "id": "story-auto-1793261260275",
+      "label": "EDITORIAL DISPATCH",
+      "courseTag": "THE MONOGRAPH",
+      "category": "ORGANIC ARCHITECTURE • SPEC 05",
+      "feedBadge": "Minimalist Design",
+      "preferenceTag": "Minimalist Design",
+      "title": "Silence in Form:<br class=\"hidden sm:inline\" /> Cedar and Basalt Sanctuaries",
+      "cleanTitle": "Silence in Form: Cedar and Basalt Sanctuaries",
+      "summary": "An exploration of how raw cedar and volcanic basalt define contemporary tea sanctuaries through spatial restraint.",
+      "author": "Curated by Kenzo Takahashi",
+      "publication": "Tea Times Global Bureau",
+      "readTime": "7 min read",
+      "timestamp": "Just Published",
+      "imgSrc": "/assets/images/auto-ai-1793261252548.jpg",
+      "caption": "Uji River Basin • Cedar & Basalt Pavilion Survey",
+      "quote": "Architecture reaches its zenith not when there is nothing left to add, but when nothing can be taken away.",
+      "bodyParagraphs": [
+        "Nestled along the fog-laden banks of the Uji river, this newly surveyed pavilion embodies contemporary restraint. The structure employs charred cedar and raw volcanic basalt to frame negative space.",
+        "Here, the boundaries between the tearoom and the surrounding forest dissolve. Ambient moisture and changing seasonal light become integral components of the architectural envelope.",
+        "This monograph documents the interplay between tactile timber finishes, unpolished stone floors, and the thermal rhythm of the tea ceremony."
+      ],
+      "likes": 18,
+      "dislikes": 0,
+      "createdAt": "2026-10-29T08:07:40.275Z"
+    },
+    {
+      "id": "story-0",
+      "label": "LIVE NEWS",
+      "courseTag": "THE COURSE",
+      "category": "EDITORIAL MONOGRAPH • H612",
+      "feedBadge": "LIVE GLOBAL NEWS",
+      "preferenceTag": "Live Global News",
+      "title": "Master the Art of Minimalist<br class='hidden sm:inline' /> Design in the Modern Era",
+      "cleanTitle": "Master the Art of Minimalist Design in the Modern Era",
+      "summary": "This comprehensive course strips away the unnecessary, focusing on core principles of spatial relationships, typography, and purposeful composition.",
+      "author": "Curated by Master Sen",
+      "publication": "Tea Times Bureau",
+      "readTime": "8 min read",
+      "timestamp": "Updated 14m ago",
+      "imgSrc": "/assets/images/slide0.jpg",
+      "caption": "Kyoto Valley Hydrological Basin • Aerial Survey",
+      "quote": "Simplicity is not the lack of clutter, that's a consequence of simplicity. Simplicity somehow essentially describes the purpose and place of an object and its surrounding atmosphere.",
+      "bodyParagraphs": [
+        "When we strip away ornamentation, what remains is pure intention. Minimalism is neither absence nor austerity; it is the deliberate orchestration of negative space to give profound clarity to what stays.",
+        "From the unvarnished wooden tea pavilions of Uji to contemporary digital interfaces, harmony is attained when spatial density, typography, and organic textures form an unhurried visual rhythm. Every proportion serves a functional and contemplative purpose.",
+        "In an era inundated with sensory noise, the disciplines of spatial calibration, natural cadence, and material respect offer an antidote. The tea ritual is architecture in motion; the room, the bowl, and the breath align."
+      ],
+      "likes": 512,
+      "dislikes": 6,
+      "createdAt": "2026-10-29T06:00:00.000Z"
+    },
+    {
+      "id": "story-1",
+      "label": "TERROIR REPORT",
+      "courseTag": "THE TERROIR",
+      "category": "SPATIAL ARCHIVE • ISSUE 02",
+      "feedBadge": "ARTISAN TERROIR",
+      "preferenceTag": "Artisan Terroir",
+      "title": "Topography, Light & Space:<br class='hidden sm:inline' /> The Organic Architecture",
+      "cleanTitle": "Topography, Light & Space: The Organic Architecture",
+      "summary": "An exploration of contours, mist dispersion, and micro-climates shaping both ancient agricultural terraces and serene contemporary dwellings.",
+      "author": "Curated by Aria Lin",
+      "publication": "Spatial Research Institute",
+      "readTime": "6 min read",
+      "timestamp": "Updated 2h ago",
+      "imgSrc": "/assets/images/slide1.jpg",
+      "caption": "Highland Mist Dispersion & Terraced Camellia Cultivation",
+      "quote": "To build in rhythm with the land is not merely an architectural gesture; it is an acknowledgment that the terrain itself is the primary author.",
+      "bodyParagraphs": [
+        "The hillsides of Wazuka rise in tiered green steps toward the clouds. Here, architecture does not impose upon geography; rather, agricultural cultivation dictates the visual language of the landscape.",
+        "Morning vapor pools within the valleys, creating micro-climates that temper direct sunlight and foster deep amino development within the Camellia sinensis leaves. The farmer and the stonemason share an identical grammar of retaining walls and natural terraces.",
+        "Modern architectural minimalism draws profound inspiration from these terraces. The dialogue between horizontal planes and sloping topography teaches us how to anchor structures lightly to the earth."
+      ],
+      "likes": 384,
+      "dislikes": 2,
+      "createdAt": "2026-10-29T04:00:00.000Z"
+    },
+    {
+      "id": "story-2",
+      "label": "VESSEL ARCHIVE",
+      "courseTag": "THE VESSELS",
+      "category": "MATERIAL STUDIES • ISSUE 03",
+      "feedBadge": "VESSELS & CRAFT",
+      "preferenceTag": "Vessels & Craft",
+      "title": "Subtle Equilibrium:<br class='hidden sm:inline' /> Tactile Geometry & Raw Clay",
+      "cleanTitle": "Subtle Equilibrium: Tactile Geometry & Raw Clay",
+      "summary": "How raku-fired ceramics and unpolished basalt surfaces cultivate mindfulness through subtle textural variations and thermal retention.",
+      "author": "Curated by Kaito Tanaka",
+      "publication": "Craft & Materiality Lab",
+      "readTime": "11 min read",
+      "timestamp": "Updated 4h ago",
+      "imgSrc": "/assets/images/slide2.jpg",
+      "caption": "Raku Ceramic Vessel on Basalt Mineral Plinth",
+      "quote": "The hand senses what the eye often overlooks: the delicate balance between coarse raw clay and the cooling stillness of freshly whisked matcha.",
+      "bodyParagraphs": [
+        "In raku ware, perfection is purposely discarded. The vessel is pulled directly from a roaring kiln at peak temperature and cooled rapidly, inducing spontaneous crackles, smoky dark carbon, and iridescent mineral blushes.",
+        "When cradled in two hands during ceremony, the weight of unglazed basalt or porous clay grounds the participant. Texture communicates warmth, history, and deliberate impermanence.",
+        "In our contemporary digital environments, designing tactile surfaces—even metaphorically through typography, dark ambient gradients, and organic meshes—revives this primordial hunger for authentic material presence."
+      ],
+      "likes": 620,
+      "dislikes": 4,
+      "createdAt": "2026-10-29T02:00:00.000Z"
+    },
+    {
+      "id": "story-3",
+      "label": "CEREMONIES & CULTURE",
+      "courseTag": "THE CEREMONY",
+      "category": "RITUAL DIALOGUE • SPEC 04",
+      "feedBadge": "CEREMONIES & CULTURE",
+      "preferenceTag": "Ceremonies & Culture",
+      "title": "The Temporal Architecture:<br class='hidden sm:inline' /> Choreography of the Tearoom",
+      "cleanTitle": "The Temporal Architecture: Choreography of the Tearoom",
+      "summary": "Examining the four-and-a-half mat chamber as an elastic universe of ritual, stillness, and spatial hospitality.",
+      "author": "Curated by Soshitsu Sen",
+      "publication": "Kyoto Heritage Guild",
+      "readTime": "9 min read",
+      "timestamp": "Updated 1h ago",
+      "imgSrc": "/assets/images/slide3.jpg",
+      "caption": "Chanoyu Bamboo Chasen & Hand-Formed Black Glaze Chawan",
+      "quote": "The crawl-in doorway of the teahouse forces all to enter on equal terms; pride and weapon are left at the gate.",
+      "bodyParagraphs": [
+        "The traditional Chashitsu (tea room) is a masterclass in compressed spatial efficiency. At roughly nine feet square, its tatami proportions guide the exact trajectory of host and guest.",
+        "Through the tiny nijiriguchi (crawl-in entrance), visitors must stoop, shedding external titles, hierarchy, and hurried thought. Within the dimly lit chamber, acoustic focus sharpens: the steam from the iron kama kettle sings like wind through pines.",
+        "This intentional choreography reminds us that great design is not about expanse, but about emotional resonance within deliberate boundaries."
+      ],
+      "likes": 440,
+      "dislikes": 3,
+      "createdAt": "2026-10-28T22:00:00.000Z"
+    },
+    {
+      "id": "story-4",
+      "label": "HARVEST REPORTS",
+      "courseTag": "THE HARVEST",
+      "category": "AGRONOMY BRIEF • S2026",
+      "feedBadge": "HARVEST REPORTS",
+      "preferenceTag": "Harvest Reports",
+      "title": "First Flush Shizuoka:<br class='hidden sm:inline' /> Solar Alignment & Tender Shoots",
+      "cleanTitle": "First Flush Shizuoka: Solar Alignment & Tender Shoots",
+      "summary": "How morning shade cloth management produces deep emerald amino concentrations in this spring's Gyokuro harvest.",
+      "author": "Curated by Hiroshi Nishi",
+      "publication": "Agricultural Meteorological Log",
+      "readTime": "7 min read",
+      "timestamp": "Updated 30m ago",
+      "imgSrc": "/assets/images/slide4.jpg",
+      "caption": "Shizuoka Micro-Climate Slopes • Spring First Flush Harvest",
+      "quote": "In the shadow of Mount Fuji, moisture trapped by midnight valleys condenses on the youngest leaves, sealing in pure umami.",
+      "bodyParagraphs": [
+        "In late April, when temperatures cross the critical 15-degree threshold, the tea bushes break dormancy with vibrant chartreuse bud spikes.",
+        "Farmers erect dark reed canopies above the fields, blocking 85% of solar radiation for twenty-one days. Deprived of harsh light, the plant suppresses bitter catechins while synthesizing rich theanine and glutamic acids.",
+        "The resulting emerald harvest yields an infusion of profound sweetness and savory brothy depth—a direct translation of shadow, cold fog, and patient cultivation."
+      ],
+      "likes": 295,
+      "dislikes": 1,
+      "createdAt": "2026-10-28T18:00:00.000Z"
+    }
+  ],
+  "comments": [
+    {
+      "id": "cmt_1",
+      "articleId": "story-0",
+      "userId": "usr_kenzo",
+      "authorName": "Kenzo Le",
+      "authorInitials": "KL",
+      "authorAvatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&h=120&q=80",
+      "mood": "Clarity",
+      "rating": 5,
+      "content": "The 16:9 ratio paired with the dot matrix grid establishes instant serenity. Beautiful tension between modern typography and nature.",
+      "createdAt": "2026-10-29T05:00:00.000Z"
+    },
+    {
+      "id": "cmt_2",
+      "articleId": "story-0",
+      "userId": "usr_elena",
+      "authorName": "Elena Rostova",
+      "authorInitials": "ER",
+      "authorAvatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&h=120&q=80",
+      "mood": "Proportion",
+      "rating": 5,
+      "content": "The expansion feels seamless and fluid. Pure editorial craftsmanship without visual distraction.",
+      "createdAt": "2026-10-29T03:00:00.000Z"
+    }
+  ],
+  "reactions": {}
+}
