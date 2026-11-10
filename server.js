@@ -9,6 +9,7 @@ const jwt = require('jsonwebtoken');
 const db = require('./db');
 const { verifyFirebaseToken } = require('./firebase');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
+const WebSocket = require('ws');
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
@@ -16,7 +17,85 @@ if (!process.env.GEMINI_API_KEY) {
   console.warn('⚠️  GEMINI_API_KEY not set in environment variables');
 }
 
-// Track last fetch time for 10-minute interval
+// Helper to generate thumbnail from a text prompt using Gemini
+async function generateThumbnailFromPrompt(prompt) {
+  const model = genAI.getGenerativeModel({model:'gemini-1.5-flash'});
+  const result = await model.generateContent(prompt);
+  const response = await result.response;
+  const url = response.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+  return url || '';
+}
+
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+if (!process.env.GEMINI_API_KEY) {
+  console.warn('⚠️  GEMINI_API_KEY not set in environment variables');
+}
+
+// Track last fetch time for 10‑minute interval
+let lastLiveNewsFetch = 0;
+let liveNewsFetchInterval = null;
+
+// ==== Live News via NewsData.io WebSocket ====
+const NEWS_API_KEY = process.env.NEWSDATA_API_KEY || 'YOUR_API_KEY';
+const NEWS_REG_ID = process.env.NEWSDATA_REG_ID || 'YOUR_REGISTRATION_ID';
+const newsWsUrl = `wss://ws.newsdata.io/ws/event?apikey=${NEWS_API_KEY}&registration_id=${NEWS_REG_ID}`;
+let newsWs;
+let liveNews = [];
+function connectNewsWs() {
+  newsWs = new WebSocket(newsWsUrl);
+  newsWs.on('open', () => console.log('✅ Connected to NewsData.io WS'));
+  newsWs.on('message', data => {
+    try {
+      const msg = JSON.parse(data);
+      if (msg && msg.data) {
+        const article = msg.data; // assume structure contains title, description, url, etc.
+        // generate thumbnail async
+        generateThumbnailFromPrompt(`Create a 300x200 thumbnail for the news article titled "${article.title}"`).then(url => {
+          article.thumbnail = url;
+          // keep only latest 50
+          liveNews.unshift(article);
+          if (liveNews.length > 50) liveNews.pop();
+        }).catch(e => console.error('Thumbnail error', e));
+      }
+    } catch (e) {
+      console.error('News WS parse error', e);
+    }
+  });
+  newsWs.on('close', () => {
+    console.warn('News WS closed, reconnecting in 5s');
+    setTimeout(connectNewsWs, 5000);
+  });
+  newsWs.on('error', err => {
+    console.error('News WS error', err);
+    newsWs.close();
+  });
+}
+connectNewsWs();
+
+// Endpoint to fetch live news (JSON)
+app.get('/api/live-news', (req, res) => {
+  res.json(liveNews.slice(0, 20)); // return most recent 20
+});
+
+// ==== Live Stock ticker (bottom) ====
+const STOCK_API_URL = process.env.STOCK_API_URL || 'https://example.com/api/stock';
+async function fetchStockData() {
+  try {
+    const resp = await fetch(STOCK_API_URL);
+    const json = await resp.json();
+    return json; // expect [{symbol, price}, ...]
+  } catch (e) {
+    console.error('Stock fetch error', e);
+    return [];
+  }
+}
+
+// Endpoint for bottom ticker data
+app.get('/api/stock-ticker', async (req, res) => {
+  const data = await fetchStockData();
+  res.json(data);
+});
+
 let lastLiveNewsFetch = 0;
 let liveNewsFetchInterval = null;
 

@@ -186,7 +186,19 @@
       box-shadow: 0 35px 80px rgba(0, 0, 0, 0.85);
     }
 
-    /* Scrollbar for right-hand narrative pane */
+    /* ==== Expo Glass Effect ==== */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 8px;
+}
+/* Apply glass effect to all buttons without overriding existing Tailwind utilities */
+button:not([class*="bg-"]):not([class*="text-"]) {
+  @apply glass-effect;
+}
+
     .reader-scrollable::-webkit-scrollbar {
       width: 4px;
     }
