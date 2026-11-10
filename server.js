@@ -78,19 +78,12 @@ if (!process.env.GEMINI_API_KEY) {
   console.warn('⚠️  GEMINI_API_KEY not set in environment variables');
 }
 
-// Helper to generate thumbnail from a text prompt using Gemini
+// Helper to generate thumbnail from a text prompt using Zero-Cost AI (Pollinations Flux + Gemini)
 async function generateThumbnailFromPrompt(prompt) {
-  if (!process.env.GEMINI_API_KEY) return '';
-  try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const url = response.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-    return url || '';
-  } catch (err) {
-    console.error('Gemini thumbnail prompt error:', err.message);
-    return '';
-  }
+  const seed = Math.floor(Math.random() * 999999);
+  const clean = (prompt || 'Minimalist architecture tea space').replace(/[^\w\s,.-]/g, ' ').trim();
+  const encoded = encodeURIComponent(clean.slice(0, 200));
+  return `https://image.pollinations.ai/prompt/${encoded}?width=1280&height=720&model=flux&nologo=true&seed=${seed}`;
 }
 
 // Track last fetch time for 10‑minute interval
@@ -577,36 +570,50 @@ app.get('/api/stocks', (req, res) => {
    5. GEMINI AI THUMBNAIL GENERATION & LIVE NEWS FETCH
 ========================================================== */
 
-// Gemini AI - Generate detailed image prompt from article content
+// Multi-Tier Zero-Cost AI Image Prompt Generator (Gemini -> Pollinations AI Text -> Algorithmic Synthesis)
 async function generateThumbnailWithGemini(articleTitle, articleSummary, articleCaption) {
-  try {
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-    
-    const prompt = `Create a detailed, vivid image generation prompt for editorial news thumbnail based on this article:
+  const cleanTitle = (articleTitle || '').replace(/<[^>]*>/g, '').trim();
+  const cleanSummary = (articleSummary || '').replace(/<[^>]*>/g, '').trim();
 
-Title: ${articleTitle}
-Summary: ${articleSummary}
-Caption context: ${articleCaption}
+  // Tier 1: Gemini AI (if key is set and active)
+  if (process.env.GEMINI_API_KEY) {
+    try {
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+      const prompt = `Create a vivid, 25-word image prompt for a 16:9 editorial architectural thumbnail based on:
+Headline: ${cleanTitle}
+Summary: ${cleanSummary}
+Context: ${articleCaption || 'Minimalist architectural design'}
+Aesthetic: Warm dark amber, charcoal textures, serene misty lighting, Hasselblad medium format, photorealistic, no text.`;
 
-Requirements:
-- Style: Minimalist architectural photography, high-end editorial aesthetic
-- Color palette: Warm dark tones, burnt amber, charcoal, deep greens
-- Mood: Serene, contemplative, sophisticated
-- Format: 16:9 landscape, photorealistic
-- Include natural elements (mist, water, wood, stone textures) where appropriate
-- No text, no logos, no people unless essential
-
-Return ONLY the detailed image description (no explanations):`;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const imagePrompt = response.text().trim();
-    
-    return imagePrompt;
-  } catch (err) {
-    console.error('Gemini AI thumbnail generation error:', err.message);
-    return null;
+      const result = await model.generateContent(prompt);
+      const response = await result.response;
+      const text = response.text().trim();
+      if (text && text.length > 15) {
+        return text;
+      }
+    } catch (err) {
+      console.warn('Gemini free-tier unavailable, automatically falling back to zero-cost AI engine.');
+    }
   }
+
+  // Tier 2: Free Pollinations Text AI Engine (100% free, no API key or billing required)
+  try {
+    const aiTextUrl = `https://text.pollinations.ai/${encodeURIComponent(
+      'Write a 20-word image generation prompt for editorial photography about: ' + cleanTitle + '. Warm amber, cedar wood, architectural minimalism, 16:9.'
+    )}`;
+    const textResp = await fetch(aiTextUrl, { signal: AbortSignal.timeout(5000) });
+    if (textResp.ok) {
+      const aiPrompt = (await textResp.text()).trim();
+      if (aiPrompt.length > 15) {
+        return aiPrompt.replace(/[^\w\s,.-]/g, ' ').slice(0, 240);
+      }
+    }
+  } catch (e) {
+    // Network fallback
+  }
+
+  // Tier 3: Algorithmic Editorial Prompt Synthesis (Deterministic, zero latency, guaranteed quality)
+  return `Award-winning editorial architectural photography depicting ${cleanTitle.slice(0, 100)}, warm burnt amber and basalt textures, serene atmospheric mist, soft dramatic lighting, Hasselblad medium format, 16:9 landscape, photorealistic, 8k, no text`;
 }
 
 // Download image from URL
