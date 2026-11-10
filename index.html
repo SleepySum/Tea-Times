@@ -829,6 +829,62 @@
     </div>
   </div>
 
+  <!-- ================= COOKIE & DATA COLLECTION CONSENT BANNER ================= -->
+  <aside class="fixed bottom-6 right-6 z-50 max-w-[430px] w-[calc(100vw-3rem)] transform transition-all duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] translate-y-12 opacity-0 pointer-events-none" id="cookieConsentBanner" aria-label="Cookie and Data Consent">
+    <div class="glass-modal rounded-3xl p-6 sm:p-7 relative overflow-hidden shadow-2xl border border-white/20 bg-[#16100d]/95 backdrop-blur-2xl">
+      <!-- Top-right 'X' Close Button with Apple Liquid Glass -->
+      <button class="absolute top-5 right-5 w-8 h-8 rounded-full flex items-center justify-center text-white/70 hover:text-white transition cursor-pointer" id="closeCookieConsentBtn" title="Dismiss">
+        <span class="material-symbols-outlined text-[17px]">close</span>
+      </button>
+
+      <!-- Header -->
+      <div class="mb-3">
+        <h3 class="text-lg font-semibold text-white tracking-tight flex items-center gap-2">
+          <span>Cookies</span>
+        </h3>
+      </div>
+
+      <!-- Main Body: Informative text on Left, Cookie Graphic on Right -->
+      <div class="flex items-center gap-4 mb-5">
+        <p class="text-xs text-slate-300 font-light leading-relaxed flex-1 select-text">
+          We use cookies and similar technologies to help personalize content, tailor and curate editorial news feeds, and provide a refined reading experience. By clicking accept, you agree to this, as outlined in our Cookies &amp; Data Policy.
+        </p>
+
+        <!-- Illustrated Cookie Graphic matching design -->
+        <div class="w-20 h-20 flex-shrink-0 flex items-center justify-center select-none">
+          <svg class="w-20 h-20 drop-shadow-lg" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="50" cy="50" r="44" fill="#E8A868"/>
+            <circle cx="48" cy="48" r="43" fill="#F4BA7B"/>
+            <path d="M78 28C84 36 86 46 84 56C81 72 68 84 52 86C38 88 26 82 18 72C24 81 36 89 50 89C68 89 85 75 87 56C88 45 84 35 78 28Z" fill="#D89552" opacity="0.6"/>
+            <!-- Chocolate Chips -->
+            <circle cx="34" cy="30" r="4.5" fill="#663A1E"/>
+            <circle cx="58" cy="26" r="4" fill="#663A1E"/>
+            <circle cx="72" cy="40" r="5" fill="#663A1E"/>
+            <circle cx="46" cy="46" r="5.5" fill="#663A1E"/>
+            <circle cx="28" cy="52" r="4" fill="#663A1E"/>
+            <circle cx="68" cy="64" r="4.5" fill="#663A1E"/>
+            <circle cx="52" cy="74" r="5" fill="#663A1E"/>
+            <circle cx="36" cy="70" r="4" fill="#663A1E"/>
+            <!-- Subtle sprinkles -->
+            <circle cx="42" cy="20" r="2" fill="#502812"/>
+            <circle cx="62" cy="50" r="2.5" fill="#502812"/>
+            <circle cx="22" cy="38" r="2" fill="#502812"/>
+          </svg>
+        </div>
+      </div>
+
+      <!-- Action Buttons styled with Apple Liquid Glass -->
+      <div class="flex items-center gap-3 pt-1">
+        <button class="flex-1 py-2.5 px-4 rounded-xl text-xs font-semibold text-white tracking-wide cursor-pointer transition active:scale-95 flex items-center justify-center gap-1.5" id="acceptCookiesBtn">
+          <span>Accept</span>
+        </button>
+        <button class="flex-1 py-2.5 px-4 rounded-xl text-xs font-medium text-slate-200 hover:text-white tracking-wide cursor-pointer transition active:scale-95 flex items-center justify-center gap-1.5" id="cookiePreferencesBtn">
+          <span>Preferences</span>
+        </button>
+      </div>
+    </div>
+  </aside>
+
   <!-- ================= FOOTER / SUBTLE BRAND MARK ================= -->
   <footer class="relative z-20 w-full px-8 pb-5 flex items-center justify-between text-[11px] font-mono text-white/30 flex-shrink-0">
     <div class="flex items-center gap-2">
@@ -1742,9 +1798,57 @@
       }
     }
 
+    /* ==========================================================
+       10. COOKIE & DATA COLLECTION CONSENT BANNER
+    ========================================================== */
+    const cookieBanner = document.getElementById('cookieConsentBanner');
+    const acceptCookiesBtn = document.getElementById('acceptCookiesBtn');
+    const cookiePreferencesBtn = document.getElementById('cookiePreferencesBtn');
+    const closeCookieConsentBtn = document.getElementById('closeCookieConsentBtn');
+
+    function checkCookieConsent() {
+      const consent = localStorage.getItem('teatimes_cookie_consent');
+      if (!consent && cookieBanner) {
+        setTimeout(() => {
+          cookieBanner.classList.remove('translate-y-12', 'opacity-0', 'pointer-events-none');
+          cookieBanner.classList.add('translate-y-0', 'opacity-100');
+        }, 1200);
+      }
+    }
+
+    function dismissCookieBanner() {
+      if (!cookieBanner) return;
+      cookieBanner.classList.remove('translate-y-0', 'opacity-100');
+      cookieBanner.classList.add('translate-y-12', 'opacity-0', 'pointer-events-none');
+    }
+
+    if (acceptCookiesBtn) {
+      acceptCookiesBtn.addEventListener('click', () => {
+        localStorage.setItem('teatimes_cookie_consent', 'accepted');
+        dismissCookieBanner();
+        showToast('Privacy & reading preferences saved', 'cookie');
+      });
+    }
+
+    if (cookiePreferencesBtn) {
+      cookiePreferencesBtn.addEventListener('click', () => {
+        dismissCookieBanner();
+        const feedBtn = document.getElementById('feedDropdownBtn');
+        if (feedBtn) feedBtn.click();
+        showToast('Customize your editorial feed', 'tune');
+      });
+    }
+
+    if (closeCookieConsentBtn) {
+      closeCookieConsentBtn.addEventListener('click', () => {
+        dismissCookieBanner();
+      });
+    }
+
     // Initialize application
     fetchStories();
     checkAuthSession();
+    checkCookieConsent();
 
     // Interactive Apple Liquid Glass specular pointer tracking (buttons only)
     document.addEventListener('mousemove', (e) => {
