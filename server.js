@@ -1,5 +1,6 @@
 require('dotenv').config();
 const express = require('express');
+const compression = require('compression');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
@@ -16,16 +17,60 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'teatimes_production_jwt_secret_2026';
 
+// 1. Brotli & Gzip Compression
+app.use(compression());
+
+// 2. Telemetry & Performance Monitoring (Tracks slow requests > 250ms)
+app.use((req, res, next) => {
+  const start = Date.now();
+  const originalSend = res.send;
+  res.send = function(...args) {
+    const duration = Date.now() - start;
+    if (!res.headersSent) {
+      res.setHeader('X-Response-Time', `${duration}ms`);
+    }
+    if (duration > 250 && !req.path.includes('/assets/')) {
+      console.warn(`⏱️ [SLOW REQUEST] ${req.method} ${req.originalUrl} - ${duration}ms`);
+    }
+    return originalSend.apply(this, args);
+  };
+  next();
+});
+
 // Middleware
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 
-// Serve static assets
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
-app.use(express.static(path.join(__dirname), {
-  index: false // Disable automatic index.html serving
+// 3. Static CDN & Cache Headers (Cache static assets for 7 days)
+app.use('/assets', express.static(path.join(__dirname, 'assets'), {
+  maxAge: '7d',
+  immutable: true
 }));
+app.use(express.static(path.join(__dirname), {
+  index: false,
+  maxAge: '1h'
+}));
+
+// 4. In-Memory TTL Cache (Redis-compatible fallback)
+const memoryCache = new Map();
+function getCached(key) {
+  const entry = memoryCache.get(key);
+  if (!entry) return null;
+  if (Date.now() > entry.expiry) {
+    memoryCache.delete(key);
+    return null;
+  }
+  return entry.data;
+}
+function setCached(key, data, ttlSeconds = 60) {
+  memoryCache.set(key, { data, expiry: Date.now() + (ttlSeconds * 1000) });
+}
+function invalidateCache(prefix) {
+  for (const k of memoryCache.keys()) {
+    if (k.startsWith(prefix)) memoryCache.delete(k);
+  }
+}
 
 // Initialize Gemini AI
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
@@ -107,12 +152,16 @@ async function fetchStockData() {
   if (!STOCK_API_URL || STOCK_API_URL.includes('example.com')) {
     return [];
   }
+  const cached = getCached('stock_ticker');
+  if (cached) return cached;
+
   try {
-    const resp = await fetch(STOCK_API_URL);
+    const resp = await fetch(STOCK_API_URL, { signal: AbortSignal.timeout(6000) });
     const json = await resp.json();
+    setCached('stock_ticker', json, 30);
     return json; // expect [{symbol, price}, ...]
   } catch (e) {
-    console.error('Stock fetch error', e);
+    console.error('Stock fetch error (with timeout):', e.message);
     return [];
   }
 }
@@ -352,7 +401,7 @@ app.post('/api/user/preferences', authenticateToken, async (req, res) => {
    3. ARTICLES & REAL REACTION ENDPOINTS
 ========================================================== */
 
-// Get all articles (optional query parameter: ?preferences=...)
+// Get all articles (with pagination & caching)
 app.get('/api/articles', authenticateToken, async (req, res) => {
   let userPrefs = null;
   if (req.user) {
@@ -363,20 +412,35 @@ app.get('/api/articles', authenticateToken, async (req, res) => {
     userPrefs = req.query.preferences.split(',');
   }
 
-  const articles = await db.getArticles(userPrefs);
-  return res.json({ articles });
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(50, Math.max(1, parseInt(req.query.limit) || 20));
+  const cacheKey = `articles_${userPrefs ? userPrefs.join('-') : 'all'}_p${page}_l${limit}`;
+
+  const cached = getCached(cacheKey);
+  if (cached) {
+    return res.json(cached);
+  }
+
+  const articles = await db.getArticles(userPrefs, page, limit);
+  const responseData = { articles, page, limit, count: articles.length };
+  setCached(cacheKey, responseData, 30); // 30s cache
+  return res.json(responseData);
 });
 
-// Get single article with comments and current user's reaction
+// Get single article with comments and current user's reaction (concurrent execution - fixes N+1)
 app.get('/api/articles/:id', authenticateToken, async (req, res) => {
-  const article = await db.getArticle(req.params.id);
+  const userId = req.user ? req.user.id : (req.headers['x-client-id'] || 'guest');
+
+  // Fix N+1 queries by fetching article, comments, and reaction in parallel
+  const [article, comments, userReaction] = await Promise.all([
+    db.getArticle(req.params.id),
+    db.getComments(req.params.id),
+    db.getUserReaction(req.params.id, userId)
+  ]);
+
   if (!article) {
     return res.status(404).json({ error: 'Article not found' });
   }
-
-  const comments = await db.getComments(req.params.id);
-  const userId = req.user ? req.user.id : (req.headers['x-client-id'] || 'guest');
-  const userReaction = await db.getUserReaction(req.params.id, userId);
 
   return res.json({ article, comments, userReaction });
 });
@@ -391,7 +455,42 @@ app.post('/api/articles/:id/react', authenticateToken, async (req, res) => {
     return res.status(404).json({ error: 'Article not found' });
   }
 
+  // Invalidate articles cache
+  invalidateCache('articles');
+
   return res.json(result);
+});
+
+// Progressive token-by-token AI response streaming (SSE)
+app.get('/api/ai/stream-summary', async (req, res) => {
+  const { topic } = req.query;
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders?.();
+
+  if (!process.env.GEMINI_API_KEY) {
+    res.write(`data: ${JSON.stringify({ chunk: 'Curated perspectives in architectural stillness and organic materiality.' })}\n\n`);
+    res.write('data: [DONE]\n\n');
+    return res.end();
+  }
+
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const prompt = `Write a short 2-sentence poetic editorial insight about: ${topic || 'minimalist architecture and tea spaces'}`;
+    const result = await model.generateContentStream(prompt);
+
+    for await (const chunk of result.stream) {
+      const text = chunk.text();
+      res.write(`data: ${JSON.stringify({ chunk: text })}\n\n`);
+    }
+    res.write('data: [DONE]\n\n');
+    res.end();
+  } catch (e) {
+    res.write(`data: ${JSON.stringify({ error: e.message })}\n\n`);
+    res.write('data: [DONE]\n\n');
+    res.end();
+  }
 });
 
 // Get comments for an article
@@ -452,6 +551,7 @@ app.post('/api/articles/:id/comments', authenticateToken, async (req, res) => {
   };
 
   await db.addComment(newComment);
+  invalidateCache('articles');
   return res.status(201).json({ comment: newComment });
 });
 
@@ -553,7 +653,7 @@ async function fetchAndAddLiveNews() {
     lastLiveNewsFetch = Date.now();
 
     const apiUrl = `https://newsdata.io/api/1/latest?apikey=${encodeURIComponent(NEWS_API_KEY)}&language=en&size=5`;
-    const resp = await fetch(apiUrl);
+    const resp = await fetch(apiUrl, { signal: AbortSignal.timeout(8000) });
     if (!resp.ok) {
       throw new Error(`NewsData.io HTTP ${resp.status}`);
     }

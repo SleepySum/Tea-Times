@@ -991,13 +991,45 @@
       localStorage.setItem('teatimes_client_id', clientId);
     }
 
+    // Debounce utility to prevent rapid repeated calls
+    function debounce(fn, delay = 250) {
+      let timer = null;
+      return function(...args) {
+        clearTimeout(timer);
+        timer = setTimeout(() => fn.apply(this, args), delay);
+      };
+    }
+
+    // Skeleton loading screen for initial fetch
+    function renderSkeleton() {
+      if (!slidesTrack) return;
+      slidesTrack.innerHTML = `
+        <div class="w-full h-full rounded-2xl bg-white/[0.03] border border-white/5 animate-pulse flex flex-col justify-end p-8 space-y-4">
+          <div class="w-28 h-3.5 bg-white/10 rounded-full"></div>
+          <div class="w-4/5 h-8 bg-white/10 rounded-xl"></div>
+          <div class="w-3/5 h-8 bg-white/10 rounded-xl"></div>
+          <div class="w-36 h-9 bg-white/10 rounded-full mt-2"></div>
+        </div>
+      `;
+    }
+
+    // Prevent duplicate concurrent API requests
+    let isFetchingStories = false;
+
     async function fetchStories() {
+      if (isFetchingStories) return;
+      isFetchingStories = true;
+
       try {
+        if (!stories || stories.length === 0) {
+          renderSkeleton();
+        }
+
         const token = localStorage.getItem('teatimes_token');
         const headers = { 'x-client-id': clientId };
         if (token) headers['Authorization'] = `Bearer ${token}`;
 
-        const res = await fetch('/api/articles', { headers });
+        const res = await fetch('/api/articles?limit=15', { headers });
         if (res.ok) {
           const data = await res.json();
           stories = data.articles || [];
@@ -1005,6 +1037,8 @@
         }
       } catch (err) {
         console.warn('API fetch fallback:', err);
+      } finally {
+        isFetchingStories = false;
       }
     }
 
@@ -1024,9 +1058,9 @@
         }`;
         slide.setAttribute('data-slide', idx);
 
-        // 100% clean photography card matching screenshot 2 - all badges/extra buttons removed
+        // 100% clean photography card matching screenshot 2 with lazy loaded images
         slide.innerHTML = `
-          <img alt="${story.cleanTitle}" class="w-full h-full object-cover object-center scale-100 group-hover:scale-[1.02] transition-transform duration-1000 ease-out" src="${story.imgSrc}">
+          <img alt="${story.cleanTitle}" loading="lazy" decoding="async" class="w-full h-full object-cover object-center scale-100 group-hover:scale-[1.02] transition-transform duration-1000 ease-out" src="${story.imgSrc}">
           <div class="absolute inset-0 bg-gradient-to-b from-black/25 via-transparent to-black/60 flex flex-col items-center justify-center gap-5 py-6 px-6 sm:px-10 text-center">
             <div class="max-w-2xl px-2">
               <h2 class="text-white text-2xl sm:text-3xl lg:text-[34px] leading-[1.2] font-normal tracking-[-0.015em] drop-shadow-sm">${story.title}</h2>
@@ -1299,6 +1333,27 @@
         const story = stories[currentSlide];
         if (!story) return;
 
+        // 1. Optimistic UI Update (Immediate response before network roundtrip)
+        const prevVote = currentVoteState;
+        const prevLikes = parseInt(story.likes || articleLikesCount.textContent || 0, 10);
+        const prevDislikes = parseInt(story.dislikes || articleDislikesCount.textContent || 0, 10);
+
+        if (currentVoteState === 'like') {
+          story.likes = Math.max(0, prevLikes - 1);
+          currentVoteState = null;
+        } else if (currentVoteState === 'dislike') {
+          story.dislikes = Math.max(0, prevDislikes - 1);
+          story.likes = prevLikes + 1;
+          currentVoteState = 'like';
+        } else {
+          story.likes = prevLikes + 1;
+          currentVoteState = 'like';
+        }
+
+        articleLikesCount.textContent = story.likes;
+        articleDislikesCount.textContent = story.dislikes;
+        updateVoteButtonUI();
+
         const token = localStorage.getItem('teatimes_token');
         const headers = { 'Content-Type': 'application/json', 'x-client-id': clientId };
         if (token) headers['Authorization'] = `Bearer ${token}`;
@@ -1320,9 +1375,23 @@
             updateVoteButtonUI();
             if (currentVoteState === 'like') showToast('Appreciation recorded', 'favorite');
             else showToast('Vote updated', 'thumb_up');
+          } else {
+            // Rollback on server rejection
+            story.likes = prevLikes;
+            story.dislikes = prevDislikes;
+            currentVoteState = prevVote;
+            articleLikesCount.textContent = prevLikes;
+            articleDislikesCount.textContent = prevDislikes;
+            updateVoteButtonUI();
           }
         } catch (e) {
-          console.error(e);
+          // Rollback on network failure
+          story.likes = prevLikes;
+          story.dislikes = prevDislikes;
+          currentVoteState = prevVote;
+          articleLikesCount.textContent = prevLikes;
+          articleDislikesCount.textContent = prevDislikes;
+          updateVoteButtonUI();
         }
       });
     }
@@ -1331,6 +1400,27 @@
       articleDislikeBtn.addEventListener('click', async () => {
         const story = stories[currentSlide];
         if (!story) return;
+
+        // 1. Optimistic UI Update (Immediate response before network roundtrip)
+        const prevVote = currentVoteState;
+        const prevLikes = parseInt(story.likes || articleLikesCount.textContent || 0, 10);
+        const prevDislikes = parseInt(story.dislikes || articleDislikesCount.textContent || 0, 10);
+
+        if (currentVoteState === 'dislike') {
+          story.dislikes = Math.max(0, prevDislikes - 1);
+          currentVoteState = null;
+        } else if (currentVoteState === 'like') {
+          story.likes = Math.max(0, prevLikes - 1);
+          story.dislikes = prevDislikes + 1;
+          currentVoteState = 'dislike';
+        } else {
+          story.dislikes = prevDislikes + 1;
+          currentVoteState = 'dislike';
+        }
+
+        articleLikesCount.textContent = story.likes;
+        articleDislikesCount.textContent = story.dislikes;
+        updateVoteButtonUI();
 
         const token = localStorage.getItem('teatimes_token');
         const headers = { 'Content-Type': 'application/json', 'x-client-id': clientId };
@@ -1352,9 +1442,23 @@
             currentVoteState = data.userReaction;
             updateVoteButtonUI();
             showToast('Feedback noted', 'thumb_down');
+          } else {
+            // Rollback on server rejection
+            story.likes = prevLikes;
+            story.dislikes = prevDislikes;
+            currentVoteState = prevVote;
+            articleLikesCount.textContent = prevLikes;
+            articleDislikesCount.textContent = prevDislikes;
+            updateVoteButtonUI();
           }
         } catch (e) {
-          console.error(e);
+          // Rollback on network failure
+          story.likes = prevLikes;
+          story.dislikes = prevDislikes;
+          currentVoteState = prevVote;
+          articleLikesCount.textContent = prevLikes;
+          articleDislikesCount.textContent = prevDislikes;
+          updateVoteButtonUI();
         }
       });
     }
@@ -1845,10 +1949,12 @@
       });
     }
 
-    // Initialize application
-    fetchStories();
-    checkAuthSession();
-    checkCookieConsent();
+    // Run independent initialization requests in parallel
+    Promise.allSettled([
+      fetchStories(),
+      checkAuthSession(),
+      checkCookieConsent()
+    ]);
 
     // Interactive Apple Liquid Glass specular pointer tracking (buttons only)
     document.addEventListener('mousemove', (e) => {

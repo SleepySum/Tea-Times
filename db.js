@@ -1,19 +1,20 @@
 const fs = require('fs');
 const path = require('path');
-const { MongoClient } = require('mongodb');
+const { createClient } = require('@libsql/client');
 
 const DB_FILE = path.join(__dirname, 'data', 'db.json');
+
+const TURSO_URL = process.env.TURSO_DATABASE_URL || 'libsql://tea-times-sumit322.aws-ap-south-1.turso.io';
+const TURSO_TOKEN = process.env.TURSO_AUTH_TOKEN || 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTQyOTM1NTcsImlkIjoiMDFhMWM0MzktMGUwMS03ZGJjLThkNzQtNmUyNzQ1NjAxYmY4Iiwia2lkIjoiVXgyMG9mTjc1RVkyZjVGRWp5RjBrb1FubTZFZ0ctbkZfcXJ2dGdCN3EyNCIsInJpZCI6IjRmODk2YWI4LTdmZGMtNDkyNC04NmYzLTA5MWFmNDdhYWZlOCJ9.lMli4DLLnhmEulE731DpEjSFNsQYDL69zrqIIjc5bSgtyQ1pbPi2gFE9XEXMAF5XPHKUPdGHipdZvhDsB7mZCQ';
 
 class Database {
   constructor() {
     this.ensureDir();
-    this.data = this.loadLocal();
-    this.client = null;
-    this.mongoDb = null;
-    this.isMongoConnected = false;
+    this.localData = this.loadLocal();
+    this.turso = null;
+    this.isTursoReady = false;
 
-    // Connect to MongoDB Atlas if URI is provided
-    this.initMongo();
+    this.initTurso();
   }
 
   ensureDir() {
@@ -42,55 +43,96 @@ class Database {
 
   saveLocal() {
     try {
-      fs.writeFileSync(DB_FILE, JSON.stringify(this.data, null, 2), 'utf-8');
+      fs.writeFileSync(DB_FILE, JSON.stringify(this.localData, null, 2), 'utf-8');
     } catch (e) {
       console.error('Error saving db.json:', e.message);
     }
   }
 
-  async initMongo() {
-    const uri = process.env.MONGODB_URI;
-    if (!uri) {
-      console.log('ℹ️  Using local database engine (data/db.json). Set MONGODB_URI for live cloud database.');
-      return;
-    }
-
+  async initTurso() {
     try {
-      this.client = new MongoClient(uri, {
-        serverSelectionTimeoutMS: 4000,
-        connectTimeoutMS: 4000
+      this.turso = createClient({
+        url: TURSO_URL,
+        authToken: TURSO_TOKEN
       });
-      await this.client.connect();
-      const dbName = process.env.MONGODB_DB || 'tea-times';
-      this.mongoDb = this.client.db(dbName);
-      this.isMongoConnected = true;
-      console.log(`🍃 Connected to MongoDB Atlas live cloud database [${dbName}]`);
 
-      // Seed collections from local data if empty
-      await this.seedIfEmpty();
+      // Quick test query
+      await this.turso.execute('SELECT 1 as test');
+      this.isTursoReady = true;
+      console.log('⚡ Turso LibSQL connected successfully (aws-ap-south-1 Mumbai)!');
+
+      // Auto-migrate tables if not exist
+      await this.ensureSchema();
     } catch (err) {
-      this.isMongoConnected = false;
-      console.warn(`⚠️  MongoDB Atlas not reachable (${err.message}). Seamlessly running on persistent local engine.`);
+      this.isTursoReady = false;
+      console.warn(`⚠️  Turso connection note (${err.message}). Using local persistent cache.`);
     }
   }
 
-  async seedIfEmpty() {
-    if (!this.isMongoConnected || !this.mongoDb) return;
+  async ensureSchema() {
+    if (!this.isTursoReady || !this.turso) return;
     try {
-      const articlesCol = this.mongoDb.collection('articles');
-      const articleCount = await articlesCol.countDocuments();
-      if (articleCount === 0 && this.data.articles.length > 0) {
-        await articlesCol.insertMany(this.data.articles);
-        console.log(`🍃 Seeded ${this.data.articles.length} initial articles to MongoDB Atlas`);
-      }
-
-      const usersCol = this.mongoDb.collection('users');
-      const userCount = await usersCol.countDocuments();
-      if (userCount === 0 && this.data.users.length > 0) {
-        await usersCol.insertMany(this.data.users);
-      }
+      await this.turso.batch([
+        `CREATE TABLE IF NOT EXISTS users (
+          id TEXT PRIMARY KEY,
+          name TEXT,
+          email TEXT UNIQUE,
+          passwordHash TEXT,
+          avatar TEXT,
+          provider TEXT,
+          role TEXT,
+          preferences TEXT,
+          createdAt TEXT
+        );`,
+        `CREATE INDEX IF NOT EXISTS idx_users_email ON users(email);`,
+        `CREATE TABLE IF NOT EXISTS articles (
+          id TEXT PRIMARY KEY,
+          label TEXT,
+          courseTag TEXT,
+          category TEXT,
+          feedBadge TEXT,
+          preferenceTag TEXT,
+          title TEXT,
+          cleanTitle TEXT,
+          summary TEXT,
+          author TEXT,
+          publication TEXT,
+          sourceUrl TEXT,
+          readTime TEXT,
+          timestamp TEXT,
+          imgSrc TEXT,
+          caption TEXT,
+          quote TEXT,
+          bodyParagraphs TEXT,
+          likes INTEGER DEFAULT 0,
+          dislikes INTEGER DEFAULT 0,
+          createdAt TEXT
+        );`,
+        `CREATE INDEX IF NOT EXISTS idx_articles_created ON articles(createdAt DESC);`,
+        `CREATE INDEX IF NOT EXISTS idx_articles_feed ON articles(feedBadge);`,
+        `CREATE TABLE IF NOT EXISTS comments (
+          id TEXT PRIMARY KEY,
+          articleId TEXT,
+          userId TEXT,
+          authorName TEXT,
+          authorInitials TEXT,
+          authorAvatar TEXT,
+          mood TEXT,
+          rating INTEGER,
+          content TEXT,
+          createdAt TEXT
+        );`,
+        `CREATE INDEX IF NOT EXISTS idx_comments_article ON comments(articleId, createdAt DESC);`,
+        `CREATE TABLE IF NOT EXISTS reactions (
+          articleId TEXT,
+          userId TEXT,
+          vote TEXT,
+          updatedAt TEXT,
+          PRIMARY KEY (articleId, userId)
+        );`
+      ]);
     } catch (e) {
-      console.warn('MongoDB seed note:', e.message);
+      console.warn('Turso schema initialization note:', e.message);
     }
   }
 
@@ -99,39 +141,51 @@ class Database {
     if (!email) return null;
     const cleanEmail = email.toLowerCase().trim();
 
-    if (this.isMongoConnected && this.mongoDb) {
+    if (this.isTursoReady && this.turso) {
       try {
-        const user = await this.mongoDb.collection('users').findOne({ email: cleanEmail });
-        if (user) {
-          const { _id, ...safeUser } = user;
-          return safeUser;
+        const rs = await this.turso.execute({
+          sql: 'SELECT * FROM users WHERE lower(email) = lower(?) LIMIT 1',
+          args: [cleanEmail]
+        });
+        if (rs.rows.length > 0) {
+          const row = rs.rows[0];
+          return {
+            ...row,
+            preferences: typeof row.preferences === 'string' ? JSON.parse(row.preferences) : (row.preferences || [])
+          };
         }
       } catch (e) {
-        console.warn('Mongo findUserByEmail error, falling back:', e.message);
+        console.warn('Turso findUserByEmail error:', e.message);
       }
     }
 
-    if (!this.data || !this.data.users) return null;
-    return this.data.users.find(u => u.email.toLowerCase() === cleanEmail) || null;
+    const local = this.localData.users.find(u => u.email.toLowerCase() === cleanEmail);
+    return local || null;
   }
 
   async findUserById(id) {
     if (!id) return null;
 
-    if (this.isMongoConnected && this.mongoDb) {
+    if (this.isTursoReady && this.turso) {
       try {
-        const user = await this.mongoDb.collection('users').findOne({ id });
-        if (user) {
-          const { _id, ...safeUser } = user;
-          return safeUser;
+        const rs = await this.turso.execute({
+          sql: 'SELECT * FROM users WHERE id = ? LIMIT 1',
+          args: [id]
+        });
+        if (rs.rows.length > 0) {
+          const row = rs.rows[0];
+          return {
+            ...row,
+            preferences: typeof row.preferences === 'string' ? JSON.parse(row.preferences) : (row.preferences || [])
+          };
         }
       } catch (e) {
-        console.warn('Mongo findUserById error, falling back:', e.message);
+        console.warn('Turso findUserById error:', e.message);
       }
     }
 
-    if (!this.data || !this.data.users) return null;
-    return this.data.users.find(u => u.id === id) || null;
+    const local = this.localData.users.find(u => u.id === id);
+    return local || null;
   }
 
   async addUser(user) {
@@ -140,19 +194,29 @@ class Database {
     }
 
     // Update local cache
-    this.data.users.push(user);
+    this.localData.users.push(user);
     this.saveLocal();
 
-    // Persist to MongoDB
-    if (this.isMongoConnected && this.mongoDb) {
+    // Persist to Turso
+    if (this.isTursoReady && this.turso) {
       try {
-        await this.mongoDb.collection('users').updateOne(
-          { id: user.id },
-          { $set: user },
-          { upsert: true }
-        );
+        await this.turso.execute({
+          sql: `INSERT OR REPLACE INTO users (id, name, email, passwordHash, avatar, provider, role, preferences, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [
+            user.id,
+            user.name || '',
+            user.email.toLowerCase(),
+            user.passwordHash || '',
+            user.avatar || '',
+            user.provider || 'email',
+            user.role || 'Member',
+            JSON.stringify(user.preferences),
+            user.createdAt || new Date().toISOString()
+          ]
+        });
       } catch (e) {
-        console.warn('Mongo addUser error:', e.message);
+        console.warn('Turso addUser error:', e.message);
       }
     }
 
@@ -160,60 +224,65 @@ class Database {
   }
 
   async updateUser(id, updates) {
-    // Update local cache
-    const index = this.data.users.findIndex(u => u.id === id);
-    let updatedUser = null;
-    if (index !== -1) {
-      this.data.users[index] = { ...this.data.users[index], ...updates };
+    const existing = await this.findUserById(id);
+    if (!existing) return null;
+
+    const merged = { ...existing, ...updates };
+
+    // Update local
+    const idx = this.localData.users.findIndex(u => u.id === id);
+    if (idx !== -1) {
+      this.localData.users[idx] = merged;
       this.saveLocal();
-      updatedUser = this.data.users[index];
     }
 
-    // Persist to MongoDB
-    if (this.isMongoConnected && this.mongoDb) {
+    // Persist to Turso
+    if (this.isTursoReady && this.turso) {
       try {
-        await this.mongoDb.collection('users').updateOne(
-          { id },
-          { $set: updates }
-        );
-        const fresh = await this.mongoDb.collection('users').findOne({ id });
-        if (fresh) {
-          const { _id, ...safe } = fresh;
-          return safe;
-        }
+        await this.turso.execute({
+          sql: `UPDATE users SET name = ?, avatar = ?, preferences = ? WHERE id = ?`,
+          args: [
+            merged.name || '',
+            merged.avatar || '',
+            JSON.stringify(merged.preferences || []),
+            id
+          ]
+        });
       } catch (e) {
-        console.warn('Mongo updateUser error:', e.message);
+        console.warn('Turso updateUser error:', e.message);
       }
     }
 
-    return updatedUser;
+    return merged;
   }
 
   async updateUserPreferences(id, preferences) {
-    const user = await this.findUserById(id);
-    if (user) {
-      return await this.updateUser(id, { preferences });
-    }
-    return null;
+    return await this.updateUser(id, { preferences });
   }
 
   // ================= ARTICLES & PERSONALIZATION =================
-  async getArticles(preferences = null) {
+  async getArticles(preferences = null, page = 1, limit = 20) {
     let list = [];
 
-    if (this.isMongoConnected && this.mongoDb) {
+    if (this.isTursoReady && this.turso) {
       try {
-        const cursor = await this.mongoDb.collection('articles').find({}).sort({ createdAt: -1 }).toArray();
-        if (cursor && cursor.length > 0) {
-          list = cursor.map(({ _id, ...article }) => article);
-        }
+        const offset = Math.max(0, (page - 1) * limit);
+        const rs = await this.turso.execute({
+          sql: 'SELECT * FROM articles ORDER BY createdAt DESC LIMIT ? OFFSET ?',
+          args: [limit, offset]
+        });
+
+        list = rs.rows.map(row => ({
+          ...row,
+          bodyParagraphs: typeof row.bodyParagraphs === 'string' ? JSON.parse(row.bodyParagraphs) : (row.bodyParagraphs || [])
+        }));
       } catch (e) {
-        console.warn('Mongo getArticles error, falling back:', e.message);
+        console.warn('Turso getArticles error, using local fallback:', e.message);
       }
     }
 
-    if (list.length === 0 && this.data && this.data.articles) {
-      list = [...this.data.articles];
+    if (list.length === 0 && this.localData.articles) {
+      list = [...this.localData.articles];
     }
 
     if (preferences && Array.isArray(preferences) && preferences.length > 0) {
@@ -230,38 +299,70 @@ class Database {
   async getArticle(id) {
     if (!id) return null;
 
-    if (this.isMongoConnected && this.mongoDb) {
+    if (this.isTursoReady && this.turso) {
       try {
-        const article = await this.mongoDb.collection('articles').findOne({ id });
-        if (article) {
-          const { _id, ...safe } = article;
-          return safe;
+        const rs = await this.turso.execute({
+          sql: 'SELECT * FROM articles WHERE id = ? LIMIT 1',
+          args: [id]
+        });
+        if (rs.rows.length > 0) {
+          const row = rs.rows[0];
+          return {
+            ...row,
+            bodyParagraphs: typeof row.bodyParagraphs === 'string' ? JSON.parse(row.bodyParagraphs) : (row.bodyParagraphs || [])
+          };
         }
       } catch (e) {
-        console.warn('Mongo getArticle error, falling back:', e.message);
+        console.warn('Turso getArticle error:', e.message);
       }
     }
 
-    if (!this.data || !this.data.articles) return null;
-    return this.data.articles.find(a => a.id === id) || null;
+    const local = this.localData.articles.find(a => a.id === id);
+    return local || null;
   }
 
   async addArticle(article) {
-    this.data.articles.unshift(article);
-    if (this.data.articles.length > 15) {
-      this.data.articles = this.data.articles.slice(0, 15);
+    this.localData.articles.unshift(article);
+    if (this.localData.articles.length > 15) {
+      this.localData.articles = this.localData.articles.slice(0, 15);
     }
     this.saveLocal();
 
-    if (this.isMongoConnected && this.mongoDb) {
+    if (this.isTursoReady && this.turso) {
       try {
-        await this.mongoDb.collection('articles').updateOne(
-          { id: article.id },
-          { $set: article },
-          { upsert: true }
-        );
+        await this.turso.execute({
+          sql: `INSERT OR REPLACE INTO articles (
+            id, label, courseTag, category, feedBadge, preferenceTag,
+            title, cleanTitle, summary, author, publication, sourceUrl,
+            readTime, timestamp, imgSrc, caption, quote, bodyParagraphs,
+            likes, dislikes, createdAt
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [
+            article.id,
+            article.label || 'LIVE NEWS',
+            article.courseTag || 'THE MONOGRAPH',
+            article.category || 'GLOBAL DISPATCH',
+            article.feedBadge || 'Live Global News',
+            article.preferenceTag || 'Live Global News',
+            article.title || '',
+            article.cleanTitle || article.title || '',
+            article.summary || '',
+            article.author || 'Tea Times Bureau',
+            article.publication || 'Tea Times',
+            article.sourceUrl || '',
+            article.readTime || '5 min read',
+            article.timestamp || 'Just Published',
+            article.imgSrc || '',
+            article.caption || '',
+            article.quote || '',
+            JSON.stringify(article.bodyParagraphs || []),
+            article.likes || 0,
+            article.dislikes || 0,
+            article.createdAt || new Date().toISOString()
+          ]
+        });
       } catch (e) {
-        console.warn('Mongo addArticle error:', e.message);
+        console.warn('Turso addArticle error:', e.message);
       }
     }
 
@@ -273,18 +374,22 @@ class Database {
     const article = await this.getArticle(articleId);
     if (!article) return null;
 
-    if (!this.data.reactions) this.data.reactions = {};
-    if (!this.data.reactions[articleId]) {
-      this.data.reactions[articleId] = {};
-    }
+    let currentVote = null;
 
-    let currentVote = this.data.reactions[articleId][userId] || null;
-
-    if (this.isMongoConnected && this.mongoDb) {
+    if (this.isTursoReady && this.turso) {
       try {
-        const rec = await this.mongoDb.collection('reactions').findOne({ articleId, userId });
-        if (rec) currentVote = rec.vote;
+        const rs = await this.turso.execute({
+          sql: 'SELECT vote FROM reactions WHERE articleId = ? AND userId = ? LIMIT 1',
+          args: [articleId, userId]
+        });
+        if (rs.rows.length > 0) {
+          currentVote = rs.rows[0].vote;
+        }
       } catch (e) {}
+    } else {
+      if (!this.localData.reactions) this.localData.reactions = {};
+      if (!this.localData.reactions[articleId]) this.localData.reactions[articleId] = {};
+      currentVote = this.localData.reactions[articleId][userId] || null;
     }
 
     let newVote = null;
@@ -314,32 +419,36 @@ class Database {
       }
     }
 
-    // Update local reactions
+    // Save local
+    if (!this.localData.reactions) this.localData.reactions = {};
+    if (!this.localData.reactions[articleId]) this.localData.reactions[articleId] = {};
     if (newVote) {
-      this.data.reactions[articleId][userId] = newVote;
+      this.localData.reactions[articleId][userId] = newVote;
     } else {
-      delete this.data.reactions[articleId][userId];
+      delete this.localData.reactions[articleId][userId];
     }
     this.saveLocal();
 
-    // Persist to MongoDB
-    if (this.isMongoConnected && this.mongoDb) {
+    // Persist to Turso
+    if (this.isTursoReady && this.turso) {
       try {
         if (newVote) {
-          await this.mongoDb.collection('reactions').updateOne(
-            { articleId, userId },
-            { $set: { articleId, userId, vote: newVote, updatedAt: new Date().toISOString() } },
-            { upsert: true }
-          );
+          await this.turso.execute({
+            sql: `INSERT OR REPLACE INTO reactions (articleId, userId, vote, updatedAt) VALUES (?, ?, ?, ?)`,
+            args: [articleId, userId, newVote, new Date().toISOString()]
+          });
         } else {
-          await this.mongoDb.collection('reactions').deleteOne({ articleId, userId });
+          await this.turso.execute({
+            sql: `DELETE FROM reactions WHERE articleId = ? AND userId = ?`,
+            args: [articleId, userId]
+          });
         }
-        await this.mongoDb.collection('articles').updateOne(
-          { id: articleId },
-          { $set: { likes: article.likes, dislikes: article.dislikes } }
-        );
+        await this.turso.execute({
+          sql: `UPDATE articles SET likes = ?, dislikes = ? WHERE id = ?`,
+          args: [article.likes, article.dislikes, articleId]
+        });
       } catch (e) {
-        console.warn('Mongo recordVote error:', e.message);
+        console.warn('Turso recordVote error:', e.message);
       }
     }
 
@@ -351,47 +460,62 @@ class Database {
   }
 
   async getUserReaction(articleId, userId) {
-    if (this.isMongoConnected && this.mongoDb) {
+    if (this.isTursoReady && this.turso) {
       try {
-        const rec = await this.mongoDb.collection('reactions').findOne({ articleId, userId });
-        if (rec) return rec.vote;
+        const rs = await this.turso.execute({
+          sql: 'SELECT vote FROM reactions WHERE articleId = ? AND userId = ? LIMIT 1',
+          args: [articleId, userId]
+        });
+        if (rs.rows.length > 0) return rs.rows[0].vote;
       } catch (e) {}
     }
 
-    if (!this.data || !this.data.reactions || !this.data.reactions[articleId]) return null;
-    return this.data.reactions[articleId][userId] || null;
+    if (!this.localData || !this.localData.reactions || !this.localData.reactions[articleId]) return null;
+    return this.localData.reactions[articleId][userId] || null;
   }
 
   // ================= COMMENTS =================
   async getComments(articleId) {
-    if (this.isMongoConnected && this.mongoDb) {
+    if (this.isTursoReady && this.turso) {
       try {
-        const comments = await this.mongoDb.collection('comments')
-          .find({ articleId })
-          .sort({ createdAt: -1 })
-          .toArray();
-        if (comments && comments.length > 0) {
-          return comments.map(({ _id, ...c }) => c);
-        }
+        const rs = await this.turso.execute({
+          sql: 'SELECT * FROM comments WHERE articleId = ? ORDER BY createdAt DESC',
+          args: [articleId]
+        });
+        return rs.rows;
       } catch (e) {
-        console.warn('Mongo getComments error, falling back:', e.message);
+        console.warn('Turso getComments error:', e.message);
       }
     }
 
-    if (!this.data || !this.data.comments) return [];
-    return this.data.comments.filter(c => c.articleId === articleId);
+    if (!this.localData || !this.localData.comments) return [];
+    return this.localData.comments.filter(c => c.articleId === articleId);
   }
 
   async addComment(comment) {
-    if (!this.data.comments) this.data.comments = [];
-    this.data.comments.unshift(comment);
+    this.localData.comments.unshift(comment);
     this.saveLocal();
 
-    if (this.isMongoConnected && this.mongoDb) {
+    if (this.isTursoReady && this.turso) {
       try {
-        await this.mongoDb.collection('comments').insertOne(comment);
+        await this.turso.execute({
+          sql: `INSERT INTO comments (id, articleId, userId, authorName, authorInitials, authorAvatar, mood, rating, content, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          args: [
+            comment.id,
+            comment.articleId,
+            comment.userId,
+            comment.authorName || 'Guest',
+            comment.authorInitials || 'GT',
+            comment.authorAvatar || '',
+            comment.mood || 'Clarity',
+            comment.rating || 5,
+            comment.content || '',
+            comment.createdAt || new Date().toISOString()
+          ]
+        });
       } catch (e) {
-        console.warn('Mongo addComment error:', e.message);
+        console.warn('Turso addComment error:', e.message);
       }
     }
 
