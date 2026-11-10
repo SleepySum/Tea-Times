@@ -1,3 +1,4 @@
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
@@ -11,24 +12,40 @@ const { verifyFirebaseToken } = require('./firebase');
 const { GoogleGenerativeAI } = require('@google/generative-ai');
 const WebSocket = require('ws');
 
+const app = express();
+const PORT = process.env.PORT || 3000;
+const JWT_SECRET = process.env.JWT_SECRET || 'teatimes_production_jwt_secret_2026';
+
+// Middleware
+app.use(cors());
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true }));
+
+// Serve static assets
+app.use('/assets', express.static(path.join(__dirname, 'assets')));
+app.use(express.static(path.join(__dirname), {
+  index: false // Disable automatic index.html serving
+}));
+
 // Initialize Gemini AI
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 if (!process.env.GEMINI_API_KEY) {
   console.warn('⚠️  GEMINI_API_KEY not set in environment variables');
 }
 
 // Helper to generate thumbnail from a text prompt using Gemini
 async function generateThumbnailFromPrompt(prompt) {
-  const model = genAI.getGenerativeModel({model:'gemini-1.5-flash'});
-  const result = await model.generateContent(prompt);
-  const response = await result.response;
-  const url = response.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
-  return url || '';
-}
-
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-if (!process.env.GEMINI_API_KEY) {
-  console.warn('⚠️  GEMINI_API_KEY not set in environment variables');
+  if (!process.env.GEMINI_API_KEY) return '';
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    const url = response.candidates?.[0]?.content?.parts?.[0]?.text?.trim();
+    return url || '';
+  } catch (err) {
+    console.error('Gemini thumbnail prompt error:', err.message);
+    return '';
+  }
 }
 
 // Track last fetch time for 10‑minute interval
@@ -36,12 +53,17 @@ let lastLiveNewsFetch = 0;
 let liveNewsFetchInterval = null;
 
 // ==== Live News via NewsData.io WebSocket ====
-const NEWS_API_KEY = process.env.NEWSDATA_API_KEY || 'YOUR_API_KEY';
-const NEWS_REG_ID = process.env.NEWSDATA_REG_ID || 'YOUR_REGISTRATION_ID';
-const newsWsUrl = `wss://ws.newsdata.io/ws/event?apikey=${NEWS_API_KEY}&registration_id=${NEWS_REG_ID}`;
+const NEWS_API_KEY = process.env.NEWSDATA_API_KEY || '';
+const NEWS_REG_ID = process.env.NEWSDATA_REG_ID || '';
 let newsWs;
 let liveNews = [];
+
 function connectNewsWs() {
+  if (!NEWS_API_KEY || !NEWS_REG_ID || NEWS_API_KEY === 'YOUR_API_KEY' || NEWS_REG_ID === 'YOUR_REGISTRATION_ID') {
+    console.warn('⚠️  NEWSDATA_API_KEY or NEWSDATA_REG_ID not set; skipping NewsData.io WS connection');
+    return;
+  }
+  const newsWsUrl = `wss://ws.newsdata.io/ws/event?apikey=${NEWS_API_KEY}&registration_id=${NEWS_REG_ID}`;
   newsWs = new WebSocket(newsWsUrl);
   newsWs.on('open', () => console.log('✅ Connected to NewsData.io WS'));
   newsWs.on('message', data => {
@@ -66,8 +88,10 @@ function connectNewsWs() {
     setTimeout(connectNewsWs, 5000);
   });
   newsWs.on('error', err => {
-    console.error('News WS error', err);
-    newsWs.close();
+    console.error('News WS error:', err.message);
+    if (newsWs && newsWs.readyState === WebSocket.OPEN) {
+      newsWs.close();
+    }
   });
 }
 connectNewsWs();
@@ -78,8 +102,11 @@ app.get('/api/live-news', (req, res) => {
 });
 
 // ==== Live Stock ticker (bottom) ====
-const STOCK_API_URL = process.env.STOCK_API_URL || 'https://example.com/api/stock';
+const STOCK_API_URL = process.env.STOCK_API_URL || '';
 async function fetchStockData() {
+  if (!STOCK_API_URL || STOCK_API_URL.includes('example.com')) {
+    return [];
+  }
   try {
     const resp = await fetch(STOCK_API_URL);
     const json = await resp.json();
@@ -95,24 +122,6 @@ app.get('/api/stock-ticker', async (req, res) => {
   const data = await fetchStockData();
   res.json(data);
 });
-
-let lastLiveNewsFetch = 0;
-let liveNewsFetchInterval = null;
-
-const app = express();
-const PORT = process.env.PORT || 3000;
-const JWT_SECRET = process.env.JWT_SECRET || 'teatimes_production_jwt_secret_2026';
-
-// Middleware
-app.use(cors());
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true }));
-
-// Serve static assets
-app.use('/assets', express.static(path.join(__dirname, 'assets')));
-app.use(express.static(path.join(__dirname), {
-  index: false // Disable automatic index.html serving
-}));
 
 // Helper: JWT verification middleware
 function authenticateToken(req, res, next) {
