@@ -52,15 +52,15 @@ async function generateThumbnailFromPrompt(prompt) {
 let lastLiveNewsFetch = 0;
 let liveNewsFetchInterval = null;
 
-// ==== Live News via NewsData.io WebSocket ====
-const NEWS_API_KEY = process.env.NEWSDATA_API_KEY || '';
+// ==== Live News via NewsData.io (WebSocket + Latest REST API) ====
+const NEWS_API_KEY = process.env.NEWSDATA_API_KEY || 'pub_3102730332fc464e88af9bcf818596f0';
 const NEWS_REG_ID = process.env.NEWSDATA_REG_ID || '';
 let newsWs;
 let liveNews = [];
 
 function connectNewsWs() {
   if (!NEWS_API_KEY || !NEWS_REG_ID || NEWS_API_KEY === 'YOUR_API_KEY' || NEWS_REG_ID === 'YOUR_REGISTRATION_ID') {
-    console.warn('⚠️  NEWSDATA_API_KEY or NEWSDATA_REG_ID not set; skipping NewsData.io WS connection');
+    console.log('ℹ️  NewsData.io REST polling active (NEWSDATA_REG_ID not set for WebSocket stream)');
     return;
   }
   const newsWsUrl = `wss://ws.newsdata.io/ws/event?apikey=${NEWS_API_KEY}&registration_id=${NEWS_REG_ID}`;
@@ -541,92 +541,92 @@ function downloadImage(url, destPath) {
   });
 }
 
-// Fetch live news from external sources and add to database
+// Fetch live news from NewsData.io and add to database with Gemini AI thumbnails
 async function fetchAndAddLiveNews() {
   try {
-    console.log('🔄 Fetching live news...');
-    lastLiveNewsFetch = Date.now();
-
-    // Use Gemini to generate current news topics based on recent trends
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-    
-    const newsContextPrompt = `Generate 3 current trending news topics in the fields of minimalist design, architecture, and artisan craftsmanship. For each topic provide:
-1. A catchy headline (no HTML)
-2. A 2-sentence summary
-3. A relevant caption for an image
-4. A suitable preference tag from: Minimalist Design, Artisan Terroir, Vessels & Craft, Ceremonies & Culture, Harvest & Commodities
-
-Return as JSON array with fields: headline, summary, caption, preferenceTag, author, publication
-
-Current date context: October 2026`;
-
-    const newsResult = await model.generateContent(newsContextPrompt);
-    const newsResponse = await newsResult.response;
-    const newsText = newsResponse.text();
-    
-    // Parse the JSON response
-    let newsItems = [];
-    try {
-      // Extract JSON from response
-      const jsonMatch = newsText.match(/\\[.*\\]/s);
-      if (jsonMatch) {
-        newsItems = JSON.parse(jsonMatch[0]);
-      }
-    } catch (e) {
-      console.error('Failed to parse news JSON:', e.message);
-    }
-
-    if (!newsItems || newsItems.length === 0) {
-      console.log('No new news items generated');
+    if (!NEWS_API_KEY || NEWS_API_KEY === 'YOUR_API_KEY') {
+      console.warn('⚠️  NEWSDATA_API_KEY not configured, skipping live news fetch');
       return;
     }
 
-    const existingArticles = await db.getArticles();
-    
-    for (const item of newsItems) {
-      if (existingArticles.length >= 7) break;
+    console.log('🔄 Fetching live news from NewsData.io...');
+    lastLiveNewsFetch = Date.now();
 
-      // Generate thumbnail with Gemini
-      const imagePrompt = await generateThumbnailWithGemini(item.headline, item.summary, item.caption);
-      
-      let imgSrc = '/assets/images/slide0.jpg'; // fallback
+    const apiUrl = `https://newsdata.io/api/1/latest?apikey=${encodeURIComponent(NEWS_API_KEY)}&language=en&size=5`;
+    const resp = await fetch(apiUrl);
+    if (!resp.ok) {
+      throw new Error(`NewsData.io HTTP ${resp.status}`);
+    }
+    const payload = await resp.json();
+    const results = Array.isArray(payload.results) ? payload.results : [];
+
+    if (results.length === 0) {
+      console.log('No new NewsData.io articles returned');
+      return;
+    }
+
+    liveNews = results.slice(0, 20);
+
+    const existingArticles = await db.getArticles();
+    const existingTitles = new Set(existingArticles.map(a => (a.cleanTitle || '').toLowerCase().trim()));
+
+    let addedCount = 0;
+    for (const item of results) {
+      if (addedCount >= 3) break;
+      const headline = (item.title || '').replace(/<[^>]*>/g, '').trim();
+      if (!headline || existingTitles.has(headline.toLowerCase())) continue;
+
+      const summary = (item.description || item.content || headline).replace(/<[^>]*>/g, '').trim();
+      const sourceName = item.source_name || item.source_id || 'Global Wire';
+      const authorName = (Array.isArray(item.creator) && item.creator[0]) || sourceName;
+      const categoryLabel = Array.isArray(item.category) && item.category[0]
+        ? String(item.category[0]).toUpperCase()
+        : 'WORLD';
+
+      // Generate editorial thumbnail prompt with Gemini
+      const imagePrompt = await generateThumbnailWithGemini(headline, summary, `${sourceName} • ${categoryLabel}`);
+
+      let imgSrc = item.image_url || '/assets/images/slide0.jpg';
       if (imagePrompt) {
         const encodedPrompt = encodeURIComponent(imagePrompt);
         const seed = Math.floor(Math.random() * 999999);
         const imageUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=1280&height=720&nologo=true&seed=${seed}`;
-        
+
         const filename = `live-news-${Date.now()}-${Math.random().toString(36).substr(2, 5)}.jpg`;
         const localFilePath = path.join(AI_IMAGES_DIR, filename);
-        imgSrc = `/assets/images/${filename}`;
-        
+
         try {
           await downloadImage(imageUrl, localFilePath);
+          imgSrc = `/assets/images/${filename}`;
         } catch (e) {
-          console.error('Failed to download generated image:', e.message);
+          console.error('Failed to download generated image, using source/fallback image:', e.message);
         }
       }
 
       const newArticle = {
         id: 'story-live-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5),
         label: 'LIVE NEWS',
-        courseTag: 'THE MONOGRAPH',
-        category: 'GLOBAL DISPATCH • LIVE',
-        feedBadge: item.preferenceTag || 'Minimalist Design',
-        preferenceTag: item.preferenceTag || 'Minimalist Design',
-        title: item.headline,
-        cleanTitle: item.headline.replace(/<[^>]*>/g, ''),
-        summary: item.summary,
-        author: item.author || 'Tea Times Global Bureau',
-        publication: item.publication || 'Tea Times Global Bureau',
-        readTime: '5 min read',
-        timestamp: 'Just Published',
-        imgSrc: imgSrc,
-        caption: item.caption || 'Archival footage',
-        quote: 'The evolving landscape of design and craft continues to inspire our global community.',
+        courseTag: 'LIVE GLOBAL NEWS',
+        category: `${categoryLabel} • LIVE DISPATCH`,
+        feedBadge: 'Live Global News',
+        preferenceTag: 'Live Global News',
+        title: headline,
+        cleanTitle: headline,
+        summary: summary.length > 260 ? summary.slice(0, 257) + '...' : summary,
+        author: authorName,
+        publication: sourceName,
+        sourceUrl: item.link || '',
+        readTime: '4 min read',
+        timestamp: item.pubDate ? new Date(item.pubDate).toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Just Published',
+        imgSrc,
+        caption: `${sourceName} • ${categoryLabel} Dispatch`,
+        quote: `"${summary.split('. ')[0]}."`,
         bodyParagraphs: [
-          item.summary,
-          'This dispatch brings you the latest developments from around the world, curated for our discerning readership.',
-          'Stay tuned for more updates as stories develop.'
+          summary,
+          item.content && item.content !== 'ONLY AVAILABLE IN PAID PLANS'
+            ? item.content
+            : `Reported via ${sourceName}. Full live dispatch synchronized from global news feeds.`,
+          item.link ? `Original wire reference: ${item.link}` : 'Curated automatically for Tea Times Live Global News.'
         ],
         likes: 0,
         dislikes: 0,
@@ -634,16 +634,25 @@ Current date context: October 2026`;
       };
 
       await db.addArticle(newArticle);
-      console.log('✅ Added live news:', item.headline);
+      existingTitles.add(headline.toLowerCase());
+      addedCount++;
+      console.log('✅ Added live news from NewsData.io:', headline);
     }
 
-    console.log('✨ Live news fetch complete');
+    // Keep total stored articles bounded at 10
+    if (db.data && Array.isArray(db.data.articles) && db.data.articles.length > 10) {
+      db.data.articles = db.data.articles.slice(0, 10);
+      db.save();
+    }
+
+    console.log(`✨ Live news fetch complete (${addedCount} new stories added)`);
   } catch (err) {
     console.error('Live news fetch error:', err.message);
   }
 }
 
-// Start 10-minute interval for fetching live news
+// Fetch live news shortly after boot and every 10 minutes
+setTimeout(fetchAndAddLiveNews, 2500);
 liveNewsFetchInterval = setInterval(async () => {
   await fetchAndAddLiveNews();
 }, 10 * 60 * 1000); // 10 minutes

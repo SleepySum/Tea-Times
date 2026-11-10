@@ -139,33 +139,173 @@
       position: relative;
     }
 
-    /* Frosted glassmorphic pill button */
-    .glass-pill-cta {
-      background: rgba(255, 255, 255, 0.12);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+    /* Apple Liquid Glass Effect — applied ONLY to buttons */
+    .glass-pill-cta,
+    .nav-arrow-btn,
+    button:not(#continueGuestBtn):not(.feed-option):not(#signOutBtn):not(.mood-pill):not(#authTabSignIn):not(#authTabSignUp):not(#googleSignInBtn):not(.carousel-dot) {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.20) 0%,
+        rgba(255, 255, 255, 0.06) 42%,
+        rgba(255, 255, 255, 0.025) 62%,
+        rgba(255, 255, 255, 0.14) 100%
+      );
+      backdrop-filter: blur(18px) saturate(195%) contrast(1.08) brightness(1.08);
+      -webkit-backdrop-filter: blur(18px) saturate(195%) contrast(1.08) brightness(1.08);
       border: 1px solid rgba(255, 255, 255, 0.22);
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.35);
-      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow:
+        0 10px 28px -6px rgba(0, 0, 0, 0.55),
+        0 2px 6px rgba(0, 0, 0, 0.28),
+        inset 0 1.5px 1px rgba(255, 255, 255, 0.60),
+        inset 0 -1.5px 2px rgba(255, 255, 255, 0.18),
+        inset 1.5px 0 4px rgba(125, 211, 252, 0.22),
+        inset -1.5px 0 4px rgba(244, 114, 182, 0.18);
+      isolation: isolate;
+      overflow: hidden;
+      transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                  box-shadow 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                  background 0.28s ease,
+                  border-color 0.28s ease,
+                  color 0.2s ease,
+                  backdrop-filter 0.28s ease;
     }
-    .glass-pill-cta:hover {
-      background: rgba(255, 255, 255, 0.24);
-      border-color: rgba(255, 255, 255, 0.45);
-      transform: translateY(-1px);
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.35), inset 0 1px 1px rgba(255, 255, 255, 0.5);
+    button:not(.absolute):not(#continueGuestBtn):not(.feed-option):not(#signOutBtn):not(.carousel-dot) {
+      position: relative;
     }
-
-    /* Discreet Carousel Nav Buttons */
-    .nav-arrow-btn {
-      background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      transition: all 0.2s ease;
+    .glass-pill-cta > *,
+    .nav-arrow-btn > *,
+    button:not(#continueGuestBtn):not(.carousel-dot) > * {
+      position: relative;
+      z-index: 1;
     }
-    .nav-arrow-btn:hover {
-      background: rgba(255, 255, 255, 0.16);
-      border-color: rgba(255, 255, 255, 0.3);
+    /* Prismatic specular edge ring */
+    .glass-pill-cta::before,
+    .nav-arrow-btn::before,
+    button:not(#continueGuestBtn):not(.feed-option):not(#signOutBtn):not(.mood-pill):not(#authTabSignIn):not(#authTabSignUp):not(.carousel-dot)::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      padding: 1.25px;
+      background: conic-gradient(
+        from var(--lg-angle, 135deg) at 50% 50%,
+        rgba(255, 255, 255, 0.88) 0deg,
+        rgba(125, 211, 252, 0.55) 55deg,
+        rgba(255, 255, 255, 0.12) 130deg,
+        rgba(244, 114, 182, 0.45) 200deg,
+        rgba(251, 191, 36, 0.42) 248deg,
+        rgba(255, 255, 255, 0.78) 310deg,
+        rgba(255, 255, 255, 0.88) 360deg
+      );
+      -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      pointer-events: none;
+      opacity: 0.72;
+      z-index: 0;
+      transition: opacity 0.28s ease;
+    }
+    /* Interactive liquid lens gloss highlight */
+    .glass-pill-cta::after,
+    .nav-arrow-btn::after,
+    button:not(#continueGuestBtn):not(.feed-option):not(#signOutBtn):not(.mood-pill):not(#authTabSignIn):not(#authTabSignUp):not(.carousel-dot)::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: inherit;
+      background:
+        radial-gradient(
+          130% 95% at var(--lg-x, 28%) var(--lg-y, 15%),
+          rgba(255, 255, 255, 0.44) 0%,
+          rgba(255, 255, 255, 0.12) 32%,
+          rgba(255, 255, 255, 0) 68%
+        ),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 48%);
+      mix-blend-mode: screen;
+      pointer-events: none;
+      opacity: 0.85;
+      z-index: 0;
+      transition: opacity 0.25s ease;
+    }
+    .glass-pill-cta:hover,
+    .nav-arrow-btn:hover,
+    button:not(#continueGuestBtn):not(.feed-option):not(#signOutBtn):not(.mood-pill):not(#authTabSignIn):not(#authTabSignUp):not(#googleSignInBtn):not(.carousel-dot):hover {
+      background: linear-gradient(
+        135deg,
+        rgba(255, 255, 255, 0.28) 0%,
+        rgba(255, 255, 255, 0.10) 45%,
+        rgba(255, 255, 255, 0.05) 65%,
+        rgba(255, 255, 255, 0.22) 100%
+      );
+      backdrop-filter: blur(22px) saturate(225%) contrast(1.1) brightness(1.14);
+      -webkit-backdrop-filter: blur(22px) saturate(225%) contrast(1.1) brightness(1.14);
+      border-color: rgba(255, 255, 255, 0.44);
+      transform: translateY(-1px) scale(1.015);
+      box-shadow:
+        0 14px 32px -6px rgba(0, 0, 0, 0.62),
+        0 4px 12px rgba(0, 0, 0, 0.35),
+        inset 0 1.5px 1.5px rgba(255, 255, 255, 0.78),
+        inset 0 -1.5px 2px rgba(255, 255, 255, 0.28),
+        inset 2px 0 6px rgba(125, 211, 252, 0.34),
+        inset -2px 0 6px rgba(244, 114, 182, 0.28);
       color: #fff;
+    }
+    .glass-pill-cta:hover::before,
+    .nav-arrow-btn:hover::before,
+    button:not(#continueGuestBtn):not(.feed-option):not(#signOutBtn):not(.mood-pill):not(#authTabSignIn):not(#authTabSignUp):not(.carousel-dot):hover::before {
+      opacity: 1;
+    }
+    button:not(#continueGuestBtn):not(.feed-option):not(#signOutBtn):not(.carousel-dot):active {
+      transform: scale(0.965) !important;
+    }
+    /* Light-mode Liquid Glass treatment for Google Sign-In button */
+    #googleSignInBtn {
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(236, 243, 250, 0.88) 100%);
+      backdrop-filter: blur(18px) saturate(180%);
+      -webkit-backdrop-filter: blur(18px) saturate(180%);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      box-shadow:
+        0 10px 26px -6px rgba(0, 0, 0, 0.45),
+        inset 0 1.5px 1px rgba(255, 255, 255, 1),
+        inset 0 -1.5px 2px rgba(148, 163, 184, 0.25);
+      overflow: hidden;
+      isolation: isolate;
+    }
+    #googleSignInBtn:hover {
+      background: linear-gradient(135deg, #ffffff 0%, rgba(241, 247, 255, 0.95) 100%);
+      transform: translateY(-1px) scale(1.01);
+    }
+    /* Segmented & mood pill buttons: subtle liquid glass capsule */
+    .mood-pill,
+    #authTabSignIn,
+    #authTabSignUp {
+      backdrop-filter: blur(12px) saturate(160%);
+      -webkit-backdrop-filter: blur(12px) saturate(160%);
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.28);
+      overflow: hidden;
+      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mood-pill:hover,
+    #authTabSignIn:hover,
+    #authTabSignUp:hover {
+      border-color: rgba(255, 255, 255, 0.32);
+      box-shadow:
+        0 4px 12px rgba(0, 0, 0, 0.3),
+        inset 0 1px 1px rgba(255, 255, 255, 0.45);
+    }
+    /* Dropdown menu item buttons: liquid glass highlight on hover/active */
+    .feed-option,
+    #signOutBtn {
+      border: 1px solid transparent;
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .feed-option:hover,
+    #signOutBtn:hover {
+      backdrop-filter: blur(14px) saturate(180%);
+      -webkit-backdrop-filter: blur(14px) saturate(180%);
+      border-color: rgba(255, 255, 255, 0.22);
+      box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.35), 0 4px 12px rgba(0, 0, 0, 0.25);
     }
 
     /* Glass dropdown menu */
@@ -185,19 +325,6 @@
       border: 1px solid rgba(255, 255, 255, 0.15);
       box-shadow: 0 35px 80px rgba(0, 0, 0, 0.85);
     }
-
-    /* ==== Expo Glass Effect ==== */
-.glass-effect {
-  background: rgba(255, 255, 255, 0.12);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.22);
-  border-radius: 8px;
-}
-/* Apply glass effect to all buttons without overriding existing Tailwind utilities */
-button:not([class*="bg-"]):not([class*="text-"]) {
-  @apply glass-effect;
-}
 
     .reader-scrollable::-webkit-scrollbar {
       width: 4px;
@@ -395,22 +522,18 @@ button:not([class*="bg-"]):not([class*="text-"]) {
       </div>
 
       <!-- Reaction & Share Bar -->
-      <div class="flex items-center gap-3">
-        <div class="flex items-center gap-1 bg-white/[0.06] border border-white/10 px-3 py-1 rounded-full text-xs">
-          <button class="hover:text-red-400 flex items-center gap-1.5 text-slate-300 transition active:scale-90 cursor-pointer" id="articleLikeBtn" title="Appreciate">
-            <span class="material-symbols-outlined text-[16px]" id="likeIcon">favorite</span>
-            <span class="font-mono text-xs" id="articleLikesCount">512</span>
-          </button>
-          <span class="text-white/20 mx-1.5">|</span>
-          <button class="hover:text-slate-100 flex items-center gap-1.5 text-slate-400 transition active:scale-90 cursor-pointer" id="articleDislikeBtn" title="Disagree">
-            <span class="material-symbols-outlined text-[16px]" id="dislikeIcon">thumb_down</span>
-            <span class="font-mono text-xs" id="articleDislikesCount">6</span>
-          </button>
-          <span class="text-white/20 mx-1.5">|</span>
-          <button class="hover:text-amber-400 text-slate-400 transition active:scale-90 cursor-pointer" id="articleShareBtn" title="Share Article">
-            <span class="material-symbols-outlined text-[15px]">share</span>
-          </button>
-        </div>
+      <div class="flex items-center gap-2 text-xs">
+        <button class="px-3.5 py-1.5 rounded-full hover:text-red-400 flex items-center gap-1.5 text-slate-200 transition active:scale-90 cursor-pointer" id="articleLikeBtn" title="Appreciate">
+          <span class="material-symbols-outlined text-[16px]" id="likeIcon">favorite</span>
+          <span class="font-mono text-xs" id="articleLikesCount">512</span>
+        </button>
+        <button class="px-3.5 py-1.5 rounded-full hover:text-slate-100 flex items-center gap-1.5 text-slate-300 transition active:scale-90 cursor-pointer" id="articleDislikeBtn" title="Disagree">
+          <span class="material-symbols-outlined text-[16px]" id="dislikeIcon">thumb_down</span>
+          <span class="font-mono text-xs" id="articleDislikesCount">6</span>
+        </button>
+        <button class="w-9 h-9 rounded-full hover:text-amber-400 text-slate-200 flex items-center justify-center transition active:scale-90 cursor-pointer" id="articleShareBtn" title="Share Article">
+          <span class="material-symbols-outlined text-[16px]">share</span>
+        </button>
       </div>
     </header>
 
@@ -815,7 +938,7 @@ button:not([class*="bg-"]):not([class*="text-"]) {
 
         // Dot button matching original style
         const dot = document.createElement('button');
-        dot.className = `${
+        dot.className = `carousel-dot ${
           idx === currentSlide ? 'w-5 bg-white' : 'w-1.5 bg-white/20 hover:bg-white/40'
         } h-1.5 rounded-full transition-all cursor-pointer`;
         dot.setAttribute('data-target', idx);
@@ -1573,6 +1696,20 @@ button:not([class*="bg-"]):not([class*="text-"]) {
     // Initialize application
     fetchStories();
     checkAuthSession();
+
+    // Interactive Apple Liquid Glass specular pointer tracking (buttons only)
+    document.addEventListener('mousemove', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const rect = btn.getBoundingClientRect();
+      if (!rect.width || !rect.height) return;
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      const angle = Math.atan2(e.clientY - (rect.top + rect.height / 2), e.clientX - (rect.left + rect.width / 2)) * (180 / Math.PI) + 90;
+      btn.style.setProperty('--lg-x', `${x.toFixed(1)}%`);
+      btn.style.setProperty('--lg-y', `${y.toFixed(1)}%`);
+      btn.style.setProperty('--lg-angle', `${angle.toFixed(1)}deg`);
+    });
   </script>
 </body>
 </html>
